@@ -24,8 +24,11 @@ function score(p){
   if(p.bvp?.hr>0) base=Math.min(97,base+1);
   return base;
 }
-function probColor(p){return p>=22?'#e8a320':p>=15?'#4a9eff':p>=10?'#22c97a':'#4a5260'}
-function tierClass(p){return p>=22?'tier-elite':p>=15?'tier-strong':p>=10?'tier-solid':'tier-watch'}
+// Tier bands for the 0-100 Rating. Calibrated to the rating's realistic active-hitter
+// range (~30-65), NOT absolute 0-100 quartiles, so the slate spreads across tiers:
+// >=52 elite · 44-51 strong · 36-43 solid · <36 watch.
+function probColor(p){return p>=52?'#e8a320':p>=44?'#4a9eff':p>=36?'#22c97a':'#4a5260'}
+function tierClass(p){return p>=52?'tier-elite':p>=44?'tier-strong':p>=36?'tier-solid':'tier-watch'}
 function toDecimal(am){return am>0?am/100+1:100/Math.abs(am)+1}
 function toAmerican(d){return d>=2?'+'+(Math.round((d-1)*100)):'-'+(Math.round(100/(d-1)))}
 function vigImp(am){return am>0?100/(am+100):Math.abs(am)/(Math.abs(am)+100)}
