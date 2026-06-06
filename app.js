@@ -35,7 +35,9 @@ let expanded=null,activeTab={},currentFilter='games',scored=[];
 
 /* ══ PARK GRID ══ */
 function renderParks(){
-  const today=['NYY','PHI','LAA','ATL','HOU','MIN','CHC','MIL','BOS','STL','SEA','ARI','TB','DET','CWS'];
+  // Today's slate = home venues hosting a game (keyed by WX, the per-day data set).
+  // Derived from data so the UI can never drift from the dataset (e.g. listing an away team).
+  const today=Object.keys(WX);
   const sorted=Object.entries(PF).sort((a,b)=>b[1].f-a[1].f);
   const list=[...sorted.filter(([k])=>today.includes(k)),...sorted.filter(([k])=>!today.includes(k))];
   document.getElementById('park-grid').innerHTML=list.slice(0,20).map(([key,p])=>{
@@ -295,28 +297,20 @@ function renderParlays(){
 }
 
 /* ══ INIT ══ */
-function getTodayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function fmtDate(s){const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const dy=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const dt=new Date(y,m-1,d);return`${dy[dt.getDay()]}, ${mo[m-1]} ${parseInt(d)}, ${y}`}
-async function initApp(){
+function initApp(){
   expanded=null;activeTab={};
-  document.getElementById('today-date').textContent=fmtDate(getTodayStr());
+  // Show the snapshot's own date — the data is static, so the UI must not imply "today".
+  document.getElementById('today-date').textContent=fmtDate(DATA_DATE);
   document.getElementById('sdot').className='status-dot loading';
   document.getElementById('status-text').textContent='Scoring players with pitch-type splits...';
   scored=PLAYERS.map(p=>({...p,prob:score(p)})).sort((a,b)=>b.prob-a.prob);
   renderParks();
-  try{
-    const res=await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${getTodayStr()}&hydrate=team,probablePitcher`);
-    if(!res.ok) throw new Error(`${res.status}`);
-    const data=await res.json();
-    const games=(data.dates?.[0]?.games||[]).length;
-    document.getElementById('status-text').textContent=`Live: ${games} games · MLB API connected · Pitch-type splits from Baseball Savant · Weather June 2, 2026`;
-    document.getElementById('sdot').className='status-dot ok';
-    document.getElementById('chip-mlb').className='api-chip live';
-  }catch(e){
-    document.getElementById('status-text').textContent=`MLB API offline — June 2, 2026 data (15 games) · Savant pitch splits loaded · IL: De La Cruz, Neto removed`;
-    document.getElementById('sdot').className='status-dot ok';
-    document.getElementById('chip-mlb').className='api-chip cached';
-  }
+  // All data is a hand-curated static snapshot — report it honestly, no "live" claims.
+  const games=Object.keys(WX).length;
+  document.getElementById('status-text').textContent=`Static snapshot · ${fmtDate(DATA_DATE)} · ${games} games · Statcast splits & weather cached · IL: De La Cruz, Neto removed`;
+  document.getElementById('sdot').className='status-dot ok';
+  ['chip-mlb','chip-savant','chip-parks','chip-wx'].forEach(id=>{const e=document.getElementById(id);if(e)e.className='api-chip cached';});
   renderPlayers();
   renderParlays();
 }

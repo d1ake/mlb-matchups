@@ -1,8 +1,11 @@
 /* ══════════════════════════════════════════════════════════
    BarrelIQ — DATA (June 2, 2026 snapshot)
    Plain script (no fetch/JSON) so index.html runs via file://
-   Defines globals: PF, WX, PLAYERS  — must load before app.js
+   Defines globals: DATA_DATE, PF, WX, PLAYERS  — must load before app.js
 ══════════════════════════════════════════════════════════ */
+
+// Canonical date of this static snapshot (single source of truth for the UI).
+const DATA_DATE="2026-06-02";
 
 /* ══════════════════════════════════════════════════════════════
    PARK FACTOR DB
@@ -35,7 +38,7 @@ const PF={
   ATL:{name:"Truist Park",f:101,tier:"neutral",notes:"Warm but humid. Near-neutral."},
   CWS:{name:"Rate Field",f:102,tier:"neutral",notes:"Slight LHB advantage. Near-neutral."},
   DET:{name:"Comerica Park",f:96,tier:"bad",notes:"Cavernous outfield. Among worst HR parks."},
-  SFG:{name:"Oracle Park",f:96,tier:"bad",notes:"Marine layer. Deep alleys. Very tough."},
+  SF:{name:"Oracle Park",f:96,tier:"bad",notes:"Marine layer. Deep alleys. Very tough."},
   SEA:{name:"T-Mobile Park",f:88,tier:"bad",notes:"Deepest park + marine air = hardest HR park in MLB."},
   SD:{name:"Petco Park",f:94,tier:"bad",notes:"Marine layer, deep fences. One of MLB's worst."}
 };
@@ -244,7 +247,7 @@ const PLAYERS=[
    bullpen:{team:"CWS",era:5.1,note:"CWS bullpen 5.1 ERA — one of MLB's worst. Buxton's real HR window is late innings."},
    note:"18.9% barrel (Savant). Career .375/1HR vs Martin. BUT Martin has 0.4 HR/9 — elite HR suppressor. Late-inning vs CWS pen (5.1 ERA) is where value lies. Boom-or-bust play."},
 
-  {id:"schmitt",name:"Casey Schmitt",team:"SFG",hand:"R",
+  {id:"schmitt",name:"Casey Schmitt",team:"SF",hand:"R",
    barrel:14.2,ev:91.3,xwoba:.359,hrPct:8.3,hrSeason:12,fdOdds:390,playingToday:true,
    venue:"MIL",game:"SF@MIL",pitcher:"Shane Drohan",pitcherHand:"L",pitcherHR9:1.5,
    l10:{avg:.318,hr:2,hot:true},
