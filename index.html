@@ -7,18 +7,40 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+.date-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:6px;flex-wrap:wrap}
+.date-picker{font-family:var(--font-mono);font-size:11px;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;letter-spacing:.04em;cursor:pointer;transition:border-color .15s}
+.date-picker:hover,.date-picker:focus{border-color:var(--gold);outline:none}
+.date-picker::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer}
+.date-picker::-webkit-calendar-picker-indicator:hover{opacity:.9}
+.slate-count{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+.slate-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);background:var(--surface)}
+.slate-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
+.slate-table th{position:sticky;top:0;background:var(--surface2);color:var(--muted);text-align:left;font-weight:500;font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px;cursor:pointer;white-space:nowrap;-webkit-user-select:none;user-select:none;border-bottom:1px solid var(--border2)}
+.slate-table th:hover{color:var(--text)}
+.slate-table th.num,.slate-table td.num{text-align:right}
+.slate-table td{padding:7px 10px;border-bottom:1px solid rgba(35,40,47,.6);color:var(--muted);white-space:nowrap}
+.slate-table tbody tr:hover{background:var(--surface2)}
+.slate-table tbody tr:last-child td{border-bottom:none}
+.slate-name{color:var(--text);font-weight:500}
+.slate-match{color:var(--muted);font-size:11px}
+.slate-rating{font-family:var(--font-disp);font-size:18px;line-height:1}
+</style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <div class="header-top">
-    <div class="logo"><span>DAILY MATCHUP ENGINE</span>Dlake Dingers</div>
+    <div class="logo"><span>DAILY MATCHUP ENGINE</span>D1ake Dingers</div>
     <div class="header-meta">
       <div class="date-badge" id="today-date">—</div>
+    <div class="date-controls">
+      <input type="date" id="date-picker" class="date-picker" onchange="onDatePick(this.value)" aria-label="Choose slate date">
       <button class="refresh-btn" onclick="initApp()">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.86 4.4 2.2M13.5 2.5v2.8h-2.8"/></svg>
         REFRESH
       </button>
+    </div>
     </div>
   </div>
   <div class="header-rule"></div>
@@ -55,6 +77,11 @@
   <div class="parlay-grid" id="parlay-grid">
     <div class="loading-state" style="grid-column:1/-1"><div class="loading-label">Calculating value...</div></div>
   </div>
+</div>
+<div class="section-title">Full Slate — All Qualified Hitters</div>
+<div class="section-note">Every qualified hitter (≥50 PA) on today's teams, scored by the same 0–100 model. Click any column to sort. (Recent-form and BvP nudges are omitted here, so a hitter's table score may differ by a point or two from their card above.)</div>
+<div id="roster-wrap">
+  <div class="loading-state"><div class="loading-label">Loading full slate...</div></div>
 </div>
 </div>
 <div class="wrap">
