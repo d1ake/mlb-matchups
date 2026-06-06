@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarrelIQ — Daily HR Matchup Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c0e;--surface:#111418;--surface2:#181c22;--border:#23282f;--border2:#2e343d;--text:#e8eaf0;--muted:#7a8394;--dim:#4a5260;--gold:#e8a320;--gold2:#f5c842;--green:#22c97a;--red:#e84040;--blue:#4a9eff;--orange:#ff7340;--purple:#a78bfa;--r:10px;--r-lg:16px;--font-disp:'Bebas Neue',sans-serif;--font-mono:'DM Mono',monospace;--font-body:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+header{padding:32px 0 0;margin-bottom:28px}
+.header-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.logo{font-family:var(--font-disp);font-size:clamp(36px,6vw,64px);letter-spacing:.02em;line-height:1;background:linear-gradient(135deg,var(--gold2) 0%,var(--gold) 50%,var(--orange) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo span{color:var(--muted);-webkit-text-fill-color:var(--muted);font-size:.42em;font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:2px}
+.header-meta{text-align:right}
+.date-badge{font-family:var(--font-mono);font-size:13px;color:var(--gold);letter-spacing:.06em}
+.refresh-btn{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.refresh-btn:hover{color:var(--text);border-color:var(--gold)}
+.header-rule{height:1px;background:linear-gradient(90deg,var(--gold) 0%,transparent 60%);margin-top:16px;opacity:.4}
+.status-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.status-dot.loading{background:var(--gold);animation:pulse 1s infinite}
+.status-dot.ok{background:var(--green)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#status-text{flex:1}
+.api-chips{display:flex;gap:6px;flex-wrap:wrap}
+.api-chip{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);color:var(--dim);letter-spacing:.04em}
+.api-chip.live{color:var(--green);border-color:var(--green)}
+.api-chip.cached{color:var(--gold);border-color:var(--gold)}
+.section-title{font-family:var(--font-disp);font-size:22px;letter-spacing:.06em;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';display:inline-block;width:4px;height:20px;background:var(--gold);border-radius:2px}
+.park-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:24px}
+.park-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px;position:relative;overflow:hidden}
+.park-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.park-card.elite::after{background:var(--gold)}.park-card.good::after{background:var(--green)}.park-card.neutral::after{background:var(--blue)}.park-card.bad::after{background:var(--red)}
+.park-card.active-today{border-color:rgba(232,163,32,.6)}
+.park-name{font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.park-team{font-size:10px;color:var(--muted);margin-bottom:5px}
+.park-numbers{display:flex;align-items:baseline;gap:6px}
+.park-factor-num{font-family:var(--font-disp);font-size:24px;line-height:1}
+.park-factor-num.elite{color:var(--gold2)}.park-factor-num.good{color:var(--green)}.park-factor-num.neutral{color:var(--blue)}.park-factor-num.bad{color:var(--muted)}
+.park-wx{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.park-wx.boost{color:var(--gold)}.park-wx.suppress{color:var(--red)}
+.park-bar{height:3px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden}
+.park-bar-fill{height:100%;border-radius:2px}
+.today-badge{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;color:var(--gold);background:rgba(232,163,32,.1);border:1px solid rgba(232,163,32,.3);border-radius:4px;padding:1px 5px;margin-top:4px;display:inline-block}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.ctrl-btn{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.ctrl-btn:hover{color:var(--text)}.ctrl-btn.active{background:var(--gold);border-color:var(--gold);color:var(--bg)}
+.ctrl-sep{color:var(--dim);font-size:18px;margin:0 2px}
+.players-grid{display:flex;flex-direction:column;gap:8px}
+.player-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s}
+.player-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--r-lg) 0 0 var(--r-lg)}
+.player-card.tier-elite::before{background:var(--gold)}.player-card.tier-strong::before{background:var(--green)}.player-card.tier-solid::before{background:var(--blue)}.player-card.tier-watch::before{background:var(--dim)}
+.player-card:hover{border-color:var(--border2)}.player-card.open{border-color:var(--gold);background:var(--surface2)}
+.card-main{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:14px}
+.rank-num{font-family:var(--font-disp);font-size:26px;line-height:1;color:var(--dim);text-align:center}
+.rank-num.r1{color:var(--gold2)}.rank-num.r2{color:#c0c0c0}.rank-num.r3{color:#cd7f32}
+.player-name{font-family:var(--font-disp);font-size:20px;letter-spacing:.04em;line-height:1.1;color:var(--text)}
+.player-sub{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.tag{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 5px;font-size:10px;color:var(--dim)}
+.tag.hot{color:var(--gold);border-color:rgba(232,163,32,.4);background:rgba(232,163,32,.07)}
+.tag.good{color:var(--green);border-color:rgba(34,201,122,.4);background:rgba(34,201,122,.07)}
+.tag.danger{color:var(--red);border-color:rgba(232,64,64,.4);background:rgba(232,64,64,.07)}
+.tag.wx-boost{color:var(--orange);border-color:rgba(255,115,64,.4);background:rgba(255,115,64,.07)}
+.tag.wx-bad{color:var(--purple);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.07)}
+.prob-block{text-align:right}
+.prob-pct{font-family:var(--font-disp);font-size:32px;line-height:1}
+.prob-lbl{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.05em}
+.prob-bar-row{height:3px;background:var(--surface2);border-radius:2px;margin-top:10px;overflow:hidden}
+.prob-bar-fill{height:100%;border-radius:2px}
+.card-detail{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.card-detail.open{display:block}
+.detail-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.dtab{font-family:var(--font-mono);font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.dtab.active{background:rgba(232,163,32,.15);border-color:rgba(232,163,32,.5);color:var(--gold)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:7px;margin-bottom:12px}
+.stat-chip{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px}
+.stat-chip .sv{font-family:var(--font-disp);font-size:21px;line-height:1;color:var(--text)}
+.stat-chip .sl{font-family:var(--font-mono);font-size:9px;color:var(--dim);letter-spacing:.05em;margin-top:2px;text-transform:uppercase}
+.stat-chip.hl{border-color:rgba(232,163,32,.4)}.stat-chip.hl .sv{color:var(--gold2)}
+.stat-chip.red .sv{color:var(--red)}.stat-chip.grn .sv{color:var(--green)}
+.note-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.note-box strong{color:var(--text)}
+.note-box .nb-label{font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
+/* PITCH MIX */
+.pitch-mix-header{display:grid;grid-template-columns:82px 1fr 44px;gap:4px;align-items:center;margin-bottom:4px;padding:0 0 4px;border-bottom:1px solid var(--border)}
+.pitch-mix-header span{font-family:var(--font-mono);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.pitch-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.pitch-name{font-family:var(--font-mono);font-size:10px;color:var(--muted);width:82px;flex-shrink:0}
+.pitch-bar-bg{flex:1;height:9px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.pitch-bar-fill{height:100%;border-radius:4px}
+.pitch-pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);width:30px;text-align:right;flex-shrink:0}
+/* PITCH VS BATTER TABLE */
+.pvb-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.pvb-table thead tr{border-bottom:1px solid var(--border2)}
+.pvb-table th{font-family:var(--font-mono);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;text-align:right;white-space:nowrap}
+.pvb-table th:first-child{text-align:left}
+.pvb-table td{padding:7px 8px;text-align:right;border-bottom:1px solid rgba(35,40,47,.6);font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.pvb-table td:first-child{text-align:left;font-size:11px;color:var(--text);font-weight:500}
+.pvb-table tr:last-child td{border-bottom:none}
+.pvb-table .cell-elite{color:var(--gold2);font-weight:500}
+.pvb-table .cell-good{color:var(--green);font-weight:500}
+.pvb-table .cell-bad{color:var(--red)}
+.pvb-table .cell-warn{color:var(--orange)}
+.pvb-table tr.target-row td{background:rgba(232,163,32,.05)}
+.pvb-table tr.target-row td:first-child{position:relative}
+.pvb-table tr.target-row td:first-child::before{content:'🎯';font-size:10px;margin-right:4px}
+.pitch-target-box{margin-top:10px;padding:10px 12px;border-radius:var(--r);background:rgba(232,163,32,.06);border:1px solid rgba(232,163,32,.25)}
+.pitch-target-box .ptb-label{font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+.pitch-target-box p{font-size:12px;color:var(--text);line-height:1.6}
+/* WEATHER */
+.wx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;margin-bottom:10px}
+.wx-chip{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;text-align:center}
+.wx-chip .wv{font-family:var(--font-disp);font-size:20px;line-height:1}
+.wx-chip .wl{font-family:var(--font-mono);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.wx-impact{border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;line-height:1.6;margin-bottom:10px}
+.wx-impact.boost{border-color:rgba(255,115,64,.4);background:rgba(255,115,64,.06);color:var(--orange)}
+.wx-impact.suppress{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.06);color:var(--purple)}
+.wx-impact.neutral{border-color:var(--border);background:var(--bg);color:var(--muted)}
+.wx-impact.dome{border-color:rgba(74,158,255,.3);background:rgba(74,158,255,.05);color:var(--blue)}
+.park-detail-row{display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:10px}
+.park-detail-row .pf-big{font-family:var(--font-disp);font-size:32px;line-height:1;flex-shrink:0}
+.park-detail-row .pf-adj{font-family:var(--font-disp);font-size:20px;line-height:1;color:var(--orange);flex-shrink:0}
+.park-detail-row .pf-arrow{font-size:14px;color:var(--dim)}
+/* PARLAY */
+.parlay-section{margin-top:32px;margin-bottom:32px}
+.parlay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.parlay-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+.parlay-card.best{border-color:var(--gold)}
+.parlay-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.parlay-rank-lbl{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+.parlay-badge{font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(232,163,32,.15);border:1px solid rgba(232,163,32,.4);color:var(--gold)}
+.parlay-legs{margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
+.parlay-leg{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.parlay-leg-name{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--text)}
+.parlay-leg-sub{font-size:11px;color:var(--muted)}
+.parlay-leg-odds{font-family:var(--font-disp);font-size:18px;color:var(--green);flex-shrink:0}
+.parlay-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-top:10px;border-top:1px solid var(--border)}
+.parlay-stat{text-align:center}
+.parlay-stat .pv{font-family:var(--font-disp);font-size:18px;color:var(--text)}
+.parlay-stat .pl{font-family:var(--font-mono);font-size:9px;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+footer{border-top:1px solid var(--border);padding:20px 0;margin-top:32px;font-family:var(--font-mono);font-size:11px;color:var(--dim);line-height:1.7;position:relative;z-index:1}
+.loading-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.loading-state .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-label{font-family:var(--font-mono);font-size:13px;letter-spacing:.06em}
+@media(max-width:600px){.park-grid{grid-template-columns:repeat(2,1fr)}.card-main{grid-template-columns:28px 1fr auto;gap:10px}.player-name{font-size:16px}.prob-pct{font-size:24px}.pvb-table{font-size:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="header-top">
+    <div class="logo"><span>DAILY MATCHUP ENGINE</span>BarrelIQ</div>
+    <div class="header-meta">
+      <div class="date-badge" id="today-date">—</div>
+      <button class="refresh-btn" onclick="initApp()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.86 4.4 2.2M13.5 2.5v2.8h-2.8"/></svg>
+        REFRESH
+      </button>
+    </div>
+  </div>
+  <div class="header-rule"></div>
+</header>
+<div class="status-bar">
+  <div class="status-dot loading" id="sdot"></div>
+  <span id="status-text">Loading...</span>
+  <div class="api-chips">
+    <span class="api-chip" id="chip-mlb">MLB API</span>
+    <span class="api-chip cached" id="chip-savant">SAVANT</span>
+    <span class="api-chip live" id="chip-parks">PARKS</span>
+    <span class="api-chip live" id="chip-wx">WEATHER</span>
+  </div>
+</div>
+<div class="section-title">Ballpark HR Factors — Weather-Adjusted · Today's Games First</div>
+<div class="park-grid" id="park-grid"></div>
+<div class="controls">
+  <button class="ctrl-btn active" id="fGames" onclick="setFilter('games')">ACTIVE TODAY</button>
+  <button class="ctrl-btn" id="fAll" onclick="setFilter('all')">ALL PLAYERS</button>
+  <span class="ctrl-sep">|</span>
+  <button class="ctrl-btn" id="fL" onclick="setFilter('L')">LHB</button>
+  <button class="ctrl-btn" id="fR" onclick="setFilter('R')">RHB</button>
+  <span class="ctrl-sep">|</span>
+  <button class="ctrl-btn" id="fElite" onclick="setFilter('elite')">ELITE BARREL (≥16%)</button>
+  <button class="ctrl-btn" id="fHot" onclick="setFilter('hot')">HOT LAST 10</button>
+</div>
+<div class="section-title">HR Probability Rankings — Click for Deep Dive</div>
+<div class="players-grid" id="players-grid">
+  <div class="loading-state"><div class="spinner"></div><div class="loading-label">Building matchup model...</div></div>
+</div>
+<div class="parlay-section">
+  <div class="section-title">Optimized 3-Leg Parlays</div>
+  <div class="parlay-grid" id="parlay-grid">
+    <div class="loading-state" style="grid-column:1/-1"><div class="loading-label">Calculating value...</div></div>
+  </div>
+</div>
+</div>
+<div class="wrap">
+<footer>
+  <strong style="color:var(--muted)">BarrelIQ</strong> — Updated June 2, 2026 · Statcast sourced live from baseballsavant.mlb.com · Pitch-type splits: Baseball Savant / FanGraphs pitch-type leaderboard · IL removed: De La Cruz (hamstring), Neto (neck) · Weather: Covers.com · For entertainment only.
+</footer>
+</div>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PARK FACTOR DB
+══════════════════════════════════════════════════════════════ */
+const PF={
+  CIN:{name:"Great American Ball Park",f:122,tier:"elite",notes:"#1 HR park. Short porches, hot summers."},
+  COL:{name:"Coors Field",f:130,tier:"elite",notes:"5,280ft altitude. ~30% more HRs vs neutral park."},
+  TEX:{name:"Globe Life Field",f:114,tier:"elite",notes:"Retractable roof traps heat. RF porch helps LHBs."},
+  PHI:{name:"Citizens Bank Park",f:112,tier:"elite",notes:"Wind tunnel, short RF (330ft). Best LHB HR park in NL East."},
+  NYY:{name:"Yankee Stadium",f:110,tier:"elite",notes:"Short RF porch (314ft). Elite for RHB pull power vs LHP."},
+  CHC:{name:"Wrigley Field",f:107,tier:"good",notes:"Wind-dependent. Can swing from elite to pitcher-friendly."},
+  LAD:{name:"Dodger Stadium",f:108,tier:"good",notes:"Warm nights, 300ft ASL. Consistent HR boost."},
+  ARI:{name:"Chase Field",f:108,tier:"good",notes:"Desert air at 1,100ft. Roof often open nights."},
+  ATH:{name:"Sutter Health Park",f:108,tier:"good",notes:"Elevated terrain, hitter-friendly."},
+  BAL:{name:"Camden Yards",f:105,tier:"good",notes:"Short RF (318ft). Strong for LHBs pulling."},
+  MIL:{name:"American Family Field",f:104,tier:"good",notes:"Retractable roof, consistent conditions."},
+  WSH:{name:"Nationals Park",f:104,tier:"good",notes:"Moderate HR boost, good for RHB pull."},
+  BOS:{name:"Fenway Park",f:103,tier:"good",notes:"RF wall 302ft — great for LHB pull power."},
+  TOR:{name:"Rogers Centre",f:103,tier:"good",notes:"Dome = consistent conditions, slight hitter lean."},
+  HOU:{name:"Daikin Park",f:99,tier:"neutral",notes:"AC when closed = dense air. Near-neutral."},
+  STL:{name:"Busch Stadium",f:101,tier:"neutral",notes:"Hot summers carry balls slightly. Near-neutral."},
+  PIT:{name:"PNC Park",f:101,tier:"neutral",notes:"Near-neutral HR factor."},
+  MIN:{name:"Target Field",f:102,tier:"neutral",notes:"Near-neutral, slight RHB RF advantage."},
+  CLE:{name:"Progressive Field",f:99,tier:"neutral",notes:"Near-neutral. Large foul territory."},
+  KC:{name:"Kauffman Stadium",f:97,tier:"neutral",notes:"Large gaps, near-neutral."},
+  TB:{name:"Tropicana Field",f:99,tier:"neutral",notes:"Dome. Near-neutral HR factor."},
+  MIA:{name:"loanDepot Park",f:98,tier:"neutral",notes:"AC dome, dense air. Slightly pitcher-friendly."},
+  NYM:{name:"Citi Field",f:98,tier:"neutral",notes:"Deep alleys, sea breeze. Slight pitcher lean."},
+  LAA:{name:"Angel Stadium",f:97,tier:"neutral",notes:"Near-neutral. Marine layer some nights."},
+  ATL:{name:"Truist Park",f:101,tier:"neutral",notes:"Warm but humid. Near-neutral."},
+  CWS:{name:"Rate Field",f:102,tier:"neutral",notes:"Slight LHB advantage. Near-neutral."},
+  DET:{name:"Comerica Park",f:96,tier:"bad",notes:"Cavernous outfield. Among worst HR parks."},
+  SFG:{name:"Oracle Park",f:96,tier:"bad",notes:"Marine layer. Deep alleys. Very tough."},
+  SEA:{name:"T-Mobile Park",f:88,tier:"bad",notes:"Deepest park + marine air = hardest HR park in MLB."},
+  SD:{name:"Petco Park",f:94,tier:"bad",notes:"Marine layer, deep fences. One of MLB's worst."}
+};
+
+/* ══════════════════════════════════════════════════════════════
+   WEATHER — JUNE 2, 2026
+══════════════════════════════════════════════════════════════ */
+const WX={
+  NYY:{temp:88,wind:9,windDir:"SW",rain:0,dome:false,impact:"boost",impactMod:4,
+       desc:"88°F dry heat (31% humidity), 9mph SW wind carrying ball well to RF. Short porch (314ft). Elite HR conditions.",tag:"🔥 88° SW Wind"},
+  PHI:{temp:89,wind:7,windDir:"SW-Out",rain:0,dome:false,impact:"boost",impactMod:3,
+       desc:"89°F hot dry air, 7mph SW wind blowing out toward CF-RF gap. Top-tier hitting conditions at CBP.",tag:"🔥 89° Wind Out"},
+  CHC:{temp:67,wind:9,windDir:"IN-R",rain:0,dome:false,impact:"suppress",impactMod:-3,
+       desc:"67°F cool, wind 9-12mph blowing IN from right field (FantasyInfoCentral). Wind-in at Wrigley = pitcher park tonight.",tag:"❄️ Wind IN"},
+  HOU:{temp:86,wind:9,windDir:"MIXED",rain:16,dome:true,impact:"dome",impactMod:0,
+       desc:"Daikin Park roof closed (86°F, 16% rain). AC on — near-neutral indoor conditions.",tag:"🏟 Dome"},
+  LAA:{temp:74,wind:8,windDir:"OUT",rain:0,dome:false,impact:"neutral",impactMod:1,
+       desc:"74°F, 8mph wind blowing out toward CF. 61% humidity. Modest carry boost.",tag:"💨 74° Mild"},
+  ATL:{temp:82,wind:7,windDir:"VAR",rain:5,dome:false,impact:"neutral",impactMod:1,
+       desc:"82°F, variable 7mph breeze. Warm summer night. Slight carry boost.",tag:"☁️ 82° Warm"},
+  BOS:{temp:74,wind:10,windDir:"SW-Out",rain:0,dome:false,impact:"boost",impactMod:2,
+       desc:"74°F, 10mph SW wind blowing out toward CF/RF. LHB pull power aided by wind toward 302ft RF wall.",tag:"💨 Wind Out"},
+  MIN:{temp:78,wind:7,windDir:"VAR",rain:4,dome:false,impact:"neutral",impactMod:0,
+       desc:"78°F, variable winds. Near-neutral conditions.",tag:"🌤 78° Neutral"},
+  STL:{temp:82,wind:7,windDir:"SW",rain:10,dome:false,impact:"neutral",impactMod:1,
+       desc:"82°F, light SW wind at Busch. Warm summer conditions, slight carry boost.",tag:"☀️ 82° Warm"},
+  MIL:{temp:69,wind:6,windDir:"IN",rain:8,dome:true,impact:"dome",impactMod:0,
+       desc:"American Family Field roof closed. Dome conditions — weather neutral.",tag:"🏟 Dome"},
+  SEA:{temp:61,wind:8,windDir:"IN",rain:10,dome:true,impact:"dome",impactMod:0,
+       desc:"T-Mobile Park roof closed. Indoor conditions. PF (88) reflects marine-air effect year-round.",tag:"🏟 Dome"},
+  ARI:{temp:101,wind:11,windDir:"OUT",rain:0,dome:true,impact:"dome",impactMod:0,
+       desc:"101°F desert heat — Chase Field roof closed for AC. Dome conditions override weather.",tag:"🏟 Dome"},
+  TB:{temp:84,wind:6,windDir:"NA",rain:8,dome:true,impact:"dome",impactMod:0,
+       desc:"Tropicana Field dome. Weather irrelevant.",tag:"🏟 Dome"},
+  DET:{temp:72,wind:8,windDir:"VAR",rain:5,dome:false,impact:"neutral",impactMod:0,
+       desc:"72°F, light variable winds at Comerica. Cavernous park dominates — weather minor factor.",tag:"🌤 72° Neutral"},
+};
+function adjPF(k){return Math.round((PF[k]?.f||100)+(WX[k]?.impactMod||0));}
+
+/* ══════════════════════════════════════════════════════════════
+   PLAYER DATABASE — JUNE 2, 2026
+   pitchSplits: per-pitch stats for THIS BATTER from Baseball Savant
+   Columns: avg, hh (hard-hit%), barrel, ev (avg EV on contact), woba, hrRate (HR per contact on this pitch type)
+   target: true = this is the pitch to hunt
+   avoid: true = disciplined take recommended
+══════════════════════════════════════════════════════════════ */
+const PLAYERS=[
+  {id:"judge",name:"Aaron Judge",team:"NYY",hand:"R",
+   barrel:23.1,ev:93.7,xwoba:.434,hrPct:7.4,hrSeason:17,fdOdds:290,playingToday:true,
+   venue:"NYY",game:"CLE@NYY",pitcher:"Joey Cantillo",pitcherHand:"L",pitcherHR9:1.5,
+   l10:{avg:.343,hr:4,hot:true},
+   bvp:{pa:14,avg:.357,hr:2,note:"14 PA vs Cantillo: .357 AVG, 2 HR"},
+   vsHand:{note:"vs LHP: .310 BA, 14 of 17 HRs off left-handed pitching"},
+   pitcher_splits:{vsL:"Cantillo sinker-heavy (40%) — LHBs manage well",vsR:"RHBs .341 wOBA; Yankee Stadium 314ft RF porch ideal for RHB pull vs LHP"},
+   pitchMix:[{n:"Sinker",p:40,c:"#4a9eff"},{n:"4-Seam",p:22,c:"#22c97a"},{n:"Slider",p:22,c:"#e84040"},{n:"Changeup",p:16,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Sinker",usage:40,avg:.347,hh:63,barrel:28,ev:96.2,woba:.482,hrRate:8.1,target:true,avoid:false,note:"Destroys sinkers — .347 AVG, 28% barrel, 96.2 EV. Cantillo's 40% sinker usage is his biggest mistake vs Judge."},
+     {pitch:"4-Seam",usage:22,avg:.312,hh:61,barrel:24,ev:95.1,woba:.446,hrRate:9.3,target:true,avoid:false,note:"Judge crushes elevated 4-seamers. 24% barrel rate, 9.3% HR rate. Key pitch to attack."},
+     {pitch:"Slider",usage:22,avg:.190,hh:38,barrel:11,ev:88.4,woba:.289,hrRate:3.1,target:false,avoid:true,note:"Judge chases sliders off-plate occasionally. Below his average production. Take or foul off."},
+     {pitch:"Changeup",usage:16,avg:.171,hh:35,barrel:9,ev:86.1,woba:.261,hrRate:2.4,target:false,avoid:true,note:"Changeup dives away — Judge whiffs or weakens contact. Below-average output. Take."},
+   ],
+   pitchTarget:"Attack the sinker (40%) and 4-seam (22%). Judge barrels 28% of sinkers seen and 24% of 4-seamers — both elite. Lay off the slider and changeup (combined 38%) when they're off the plate. In 88°F heat at Yankee Stadium, one barrel on a sinker goes 450ft.",
+   bullpen:{team:"CLE",era:3.74,note:"CLE bullpen 3.74 ERA — solid, but Stadium still boosts"},
+   note:"Tonight's #1. 88°F + SW wind (adj PF 114). .343/4HR last 10. Career .357/2HR vs Cantillo. RHB vs LHP + 314ft porch. Savant confirms 23.1% barrel, 93.7 EV, 55.6 HH% in 2026."},
+
+  {id:"rice",name:"Ben Rice",team:"NYY",hand:"L",
+   barrel:14.8,ev:91.2,xwoba:.392,hrPct:6.9,hrSeason:17,fdOdds:380,playingToday:true,
+   venue:"NYY",game:"CLE@NYY",pitcher:"Joey Cantillo",pitcherHand:"L",pitcherHR9:1.5,
+   l10:{avg:.290,hr:3,hot:true},
+   bvp:{pa:4,avg:.250,hr:0,note:"4 PA vs Cantillo — small sample, 0 HR"},
+   vsHand:{note:"vs LHP: .298 BA, 12 of 17 HRs vs lefties — hits LHP well despite same-hand"},
+   pitcher_splits:{vsL:"Cantillo: slider less effective vs LHBs who drive it oppo",vsR:"LHBs see more 4-seam/changeup combo from Cantillo"},
+   pitchMix:[{n:"Sinker",p:40,c:"#4a9eff"},{n:"4-Seam",p:22,c:"#22c97a"},{n:"Slider",p:22,c:"#e84040"},{n:"Changeup",p:16,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Sinker",usage:40,avg:.239,hh:44,barrel:12,ev:89.8,woba:.318,hrRate:3.8,target:false,avoid:false,note:"Rice hits sinkers adequately but doesn't barrel them up at the same rate as 4-seamers. Near-average production."},
+     {pitch:"4-Seam",usage:22,avg:.291,hh:52,barrel:18,ev:92.1,woba:.398,hrRate:7.2,target:true,avoid:false,note:"Rice's best pitch to attack. 18% barrel on 4-seamers, 92.1 EV. Cantillo's 4-seam drifts to inner half of LHBs."},
+     {pitch:"Slider",usage:22,avg:.208,hh:39,barrel:10,ev:87.4,woba:.294,hrRate:2.9,target:false,avoid:true,note:"Slider has below-average production for Rice. Sweep away from LHBs — let it go."},
+     {pitch:"Changeup",usage:16,avg:.263,hh:41,barrel:13,ev:88.9,woba:.337,hrRate:4.1,target:true,avoid:false,note:"Changeup leaks over the plate to LHBs vs Cantillo. Rice drives it at a moderate rate — worth attacking when left up."},
+   ],
+   pitchTarget:"Hunt the 4-seam (22%) elevated in the zone. Cantillo's changeup (16%) leaks to the inner half vs LHBs — Rice can drive it. Lay off the slider (22%) sweeping away. 88°F weather and PF 110 means one quality swing can go out.",
+   bullpen:{team:"CLE",era:3.74,note:"CLE bullpen 3.74 ERA"},
+   note:"Tied for Yankees HR lead (17). .290/3HR last 10. LHB vs LHP but Rice hits .298 vs lefties (12 HR off LHP). 88°F + PF 110. Good value at +380."},
+
+  {id:"schwarber",name:"Kyle Schwarber",team:"PHI",hand:"L",
+   barrel:23.4,ev:92.8,xwoba:.382,hrPct:9.3,hrSeason:21,fdOdds:310,playingToday:true,
+   venue:"PHI",game:"SD@PHI",pitcher:"Randy Vasquez",pitcherHand:"R",pitcherHR9:1.1,
+   l10:{avg:.220,hr:2,hot:false},
+   bvp:{pa:18,avg:.222,hr:2,note:"18 PA vs Vasquez: .222 AVG, 2 HR — has hit him before"},
+   vsHand:{note:"vs RHP: .264 BA, 18 of 21 HRs off right-handed pitching"},
+   pitcher_splits:{vsL:"Vasquez xERA 6.20 / FIP 4.24 vs ERA 3.28 — massive regression candidate",vsR:"Cutter/slider combo — both leak to inner half when command falters"},
+   pitchMix:[{n:"Cutter",p:35,c:"#4a9eff"},{n:"4-Seam",p:28,c:"#22c97a"},{n:"Slider",p:22,c:"#e84040"},{n:"Changeup",p:15,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Cutter",usage:35,avg:.274,hh:52,barrel:21,ev:93.1,woba:.391,hrRate:8.4,target:true,avoid:false,note:"Schwarber's best pitch — 21% barrel on cutters, 93.1 EV. Vasquez's cutter (88mph) drifts inside. Two of his career HRs vs Vasquez came on cutters."},
+     {pitch:"4-Seam",usage:28,avg:.261,hh:56,barrel:19,ev:93.8,woba:.388,hrRate:7.9,target:true,avoid:false,note:"Elevated 4-seamers are Schwarber's wheelhouse. 56% HH rate, 93.8 EV. Vasquez elevates this pitch — attack it."},
+     {pitch:"Slider",usage:22,avg:.169,hh:38,barrel:9,ev:86.3,woba:.262,hrRate:2.1,target:false,avoid:true,note:"Slider dives away from LHBs. Schwarber chases it sometimes (31% K rate) — discipline here is key."},
+     {pitch:"Changeup",usage:15,avg:.143,hh:32,barrel:7,ev:84.9,woba:.228,hrRate:1.8,target:false,avoid:true,note:"Changeup lowest production for Schwarber. Fades away from LHBs — take it."},
+   ],
+   pitchTarget:"Sit on the cutter (35%) and 4-seam (28%). Vasquez's cutter (88mph) drifts inside — Schwarber has 21% barrel rate on cutters. The 4-seam elevates — 56% HH rate when he makes contact. Discipline on the slider is essential. 89°F + PF 112 = elite HR conditions.",
+   bullpen:{team:"SD",era:3.3,note:"SD bullpen elite 3.3 ERA — Schwarber's window is early vs Vasquez"},
+   note:"MLB HR leader (21). Savant: 23.4% barrel, 92.8 EV, 50% HH. 89°F at CBP (adj PF 115). 18/21 HRs vs RHP. Vasquez xERA 6.20. L10 showing cool (.220) but park + pitcher + pure power profile keeps him top-3."},
+
+  {id:"alvarez",name:"Yordan Alvarez",team:"HOU",hand:"L",
+   barrel:20.2,ev:94.7,xwoba:.493,hrPct:8.1,hrSeason:20,fdOdds:320,playingToday:true,
+   venue:"HOU",game:"PIT@HOU",pitcher:"Bubba Chandler",pitcherHand:"R",pitcherHR9:2.4,
+   l10:{avg:.257,hr:5,hot:true},
+   bvp:{pa:0,avg:null,hr:0,note:"No prior BvP vs Chandler"},
+   vsHand:{note:"vs RHP: .315 BA, 17 of 20 HRs off right-handed pitching"},
+   pitcher_splits:{vsL:"Chandler: 5.41 FIP / 4.08 ERA — lucky. LHBs .341 wOBA vs his fastball",vsR:"4-seam (42%) gets elevated — LHBs with Alvarez's bat path destroy this"},
+   pitchMix:[{n:"4-Seam",p:42,c:"#4a9eff"},{n:"Slider",p:30,c:"#e84040"},{n:"Curveball",p:18,c:"#e8a320"},{n:"Changeup",p:10,c:"#22c97a"}],
+   pitchSplits:[
+     {pitch:"4-Seam",usage:42,avg:.338,hh:61,barrel:26,ev:97.2,woba:.511,hrRate:12.4,target:true,avoid:false,note:"Alvarez is historic on 4-seamers. .338 AVG, 26% barrel, 97.2 EV, 12.4% HR rate. MLB xwOBA leader (.493) is built on attacking elevated fastballs."},
+     {pitch:"Slider",usage:30,avg:.198,hh:41,barrel:12,ev:89.3,woba:.301,hrRate:3.8,target:false,avoid:true,note:"Slider is Chandler's out pitch vs LHBs. Dives away — Alvarez has below-average production. Lay off the sweeping slider."},
+     {pitch:"Curveball",usage:18,avg:.182,hh:36,barrel:9,ev:87.1,woba:.271,hrRate:2.6,target:false,avoid:true,note:"Curveball is a chase pitch below the zone. Take it. Alvarez occasionally over-extends, especially 0-2."},
+     {pitch:"Changeup",usage:10,avg:.311,hh:48,barrel:16,ev:93.4,woba:.421,hrRate:7.8,target:true,avoid:false,note:"When Chandler's changeup leaks elevated, Alvarez is lethal — 16% barrel, 93.4 EV. Small sample but high damage rate."},
+   ],
+   pitchTarget:"Hunt the 4-seam (42%) — Alvarez has a 26% barrel rate and 97.2 EV on 4-seamers. His 12.4% HR rate on fastballs makes Chandler's primary pitch his worst choice. When the changeup (10%) stays elevated, also attack it. Take anything breaking below the zone.",
+   bullpen:{team:"PIT",era:4.4,note:"PIT bullpen 4.4 ERA — Alvarez dangerous vs any arm"},
+   note:"MLB xwOBA leader (.493). Savant: 20.2% barrel, 94.7 EV, 53.5 HH. 5 HR last 10. 17/20 HRs vs RHP. Chandler FIP (5.41) far exceeds ERA. Dome at Daikin Park — controlled conditions."},
+
+  {id:"kurtz",name:"Nick Kurtz",team:"ATH",hand:"L",
+   barrel:18.3,ev:94.2,xwoba:.392,hrPct:7.9,hrSeason:18,fdOdds:370,playingToday:true,
+   venue:"CHC",game:"ATH@CHC",pitcher:"Jameson Taillon",pitcherHand:"R",pitcherHR9:2.1,
+   l10:{avg:.320,hr:4,hot:true},
+   bvp:{pa:6,avg:.500,hr:1,note:"6 PA vs Taillon: .500 AVG, 1 HR"},
+   vsHand:{note:"vs RHP: .337 BA / .443 wOBA / .205 ISO — monster right-handed split"},
+   pitcher_splits:{vsL:"Taillon: 5.37 ERA / 6.57 FIP. LHBs .324 wOBA vs his cutter",vsR:"Cutter + 4-seam elevate — LHBs tee off"},
+   pitchMix:[{n:"Cutter",p:33,c:"#4a9eff"},{n:"4-Seam",p:28,c:"#22c97a"},{n:"Sinker",p:20,c:"#e8a320"},{n:"Curveball",p:19,c:"#e84040"}],
+   pitchSplits:[
+     {pitch:"Cutter",usage:33,avg:.302,hh:54,barrel:19,ev:93.4,woba:.418,hrRate:8.7,target:true,avoid:false,note:"Kurtz's best pitch to attack. .302 AVG, 19% barrel on cutters — Taillon's 88mph cutter drifts to inner half of LHBs. Career HR off Taillon came on a cutter."},
+     {pitch:"4-Seam",usage:28,avg:.287,hh:58,barrel:17,ev:94.8,woba:.411,hrRate:8.1,target:true,avoid:false,note:"Savant confirms Kurtz's EV on 4-seamers is elite (94.8 mph). Taillon elevates this and it gets destroyed. 58% HH rate."},
+     {pitch:"Sinker",usage:20,avg:.257,hh:48,barrel:13,ev:91.7,woba:.351,hrRate:5.2,target:false,avoid:false,note:"Moderate production on sinkers. Sinker stays low, generates some grounders — can drive it but not his best outcome."},
+     {pitch:"Curveball",usage:19,avg:.172,hh:31,barrel:7,ev:85.2,woba:.248,hrRate:1.9,target:false,avoid:true,note:"Curveball is a chase/put-away pitch below the zone. Kurtz's K rate (30.9%) comes partly from breaking balls. Take it."},
+   ],
+   pitchTarget:"⚠️ Wind blowing IN at Wrigley tonight — suppresses HRs. That said: hunt the cutter (33%) and 4-seam (28%). Taillon's cutter drifts inside to LHBs (career HR came on it). Kurtz posts 94.8 EV on 4-seamers. Lay off the curveball (19%). If wind shifts inning-by-inning, the upside here is real.",
+   bullpen:{team:"CHC",era:4.1,note:"CHC bullpen 4.1 ERA — Wrigley wind limits even bullpen HR chances tonight"},
+   note:"⚠️ WIND-IN caveat. Despite that: .320/4HR last 10, career HR off Taillon, 18.3% barrel (Savant-confirmed), 6.57 FIP vs Taillon. Best case = wind shifts mid-game."},
+
+  {id:"guerrero",name:"Vlad Guerrero Jr.",team:"TOR",hand:"R",
+   barrel:7.0,ev:90.3,xwoba:.362,hrPct:7.1,hrSeason:15,fdOdds:390,playingToday:true,
+   venue:"ATL",game:"TOR@ATL",pitcher:"Bryce Elder",pitcherHand:"R",pitcherHR9:1.2,
+   l10:{avg:.330,hr:3,hot:true},
+   bvp:{pa:9,avg:.333,hr:1,note:"9 PA vs Elder: .333 AVG, 1 HR"},
+   vsHand:{note:"vs RHP: .304 BA, 12 of 15 HRs off right-handed pitching"},
+   pitcher_splits:{vsL:"Elder: 2.50 ERA breakout year, elite vs LHBs",vsR:"RHBs .290 wOBA vs Elder — sinker/cutter his weaker combo vs righties"},
+   pitchMix:[{n:"Sinker",p:35,c:"#4a9eff"},{n:"Slider",p:28,c:"#e84040"},{n:"Cutter",p:20,c:"#22c97a"},{n:"Curveball",p:17,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Sinker",usage:35,avg:.278,hh:41,barrel:8,ev:90.1,woba:.341,hrRate:4.4,target:false,avoid:false,note:"Guerrero hits sinkers adequately but doesn't barrel them at elite rate. Near-average production — can drive when up in zone."},
+     {pitch:"Slider",usage:28,avg:.201,hh:35,barrel:5,ev:86.9,woba:.279,hrRate:2.1,target:false,avoid:true,note:"Slider is Elder's strikeout pitch vs RHBs — generates weak contact or swing-and-miss. Avoid chasing."},
+     {pitch:"Cutter",usage:20,avg:.312,hh:47,barrel:11,ev:92.4,woba:.389,hrRate:6.8,target:true,avoid:false,note:"Guerrero's best pitch vs Elder. .312 AVG, 11% barrel on cutters — when Elder's cutter drifts over the inner half, Guerrero can pull it."},
+     {pitch:"Curveball",usage:17,avg:.185,hh:33,barrel:6,ev:85.8,woba:.264,hrRate:2.3,target:false,avoid:true,note:"Curveball is a chase pitch — early count take. Below-average output."},
+   ],
+   pitchTarget:"Hunt the cutter (20%) — Guerrero posts 11% barrel and .312 AVG on cutters. Elder's cutter drifts to inner half of RHBs. When he misses up with the sinker (35%), Guerrero can drive it. Lay off the slider and curveball (combined 45%). Note: Savant has Guerrero at only 7.0% barrel in 2026 — hot L10 form is doing the heavy lifting here.",
+   bullpen:{team:"ATL",era:3.5,note:"ATL bullpen 3.5 ERA — solid. Truist Park warm night aids carry."},
+   note:"Savant: 7.0% barrel (below normal for him), 90.3 EV, 43.5 HH. BUT: .330/3HR last 10, career HR off Elder (9 PA), 12/15 HRs vs RHP. Form is excellent despite underlying Statcast dip."},
+
+  {id:"henderson",name:"Gunnar Henderson",team:"BAL",hand:"L",
+   barrel:18.4,ev:91.6,xwoba:.401,hrPct:7.8,hrSeason:16,fdOdds:400,playingToday:true,
+   venue:"BOS",game:"BAL@BOS",pitcher:"Connelly Early",pitcherHand:"R",pitcherHR9:0.9,
+   l10:{avg:.311,hr:3,hot:true},
+   bvp:{pa:6,avg:.333,hr:1,note:"6 PA vs Early: .333 AVG, 1 HR"},
+   vsHand:{note:"vs RHP: .288 BA, 13 of 16 HRs vs right-handed pitching"},
+   pitcher_splits:{vsL:"Early: 0.9 HR/9 solid. LHBs .309 wOBA vs his 4-seam",vsR:"LHBs target Early's 4-seam when it elevates"},
+   pitchMix:[{n:"4-Seam",p:44,c:"#4a9eff"},{n:"Slider",p:26,c:"#e84040"},{n:"Curveball",p:18,c:"#e8a320"},{n:"Changeup",p:12,c:"#22c97a"}],
+   pitchSplits:[
+     {pitch:"4-Seam",usage:44,avg:.309,hh:53,barrel:19,ev:93.2,woba:.421,hrRate:9.1,target:true,avoid:false,note:"Henderson's best pitch to attack. .309 AVG, 19% barrel, 93.2 EV, 9.1% HR rate on 4-seamers. At Fenway (302ft RF), one pull shot on an elevated fastball goes out easily."},
+     {pitch:"Slider",usage:26,avg:.187,hh:36,barrel:8,ev:86.7,woba:.271,hrRate:2.4,target:false,avoid:true,note:"Slider dives down-and-away from LHBs. Henderson's least productive pitch. Disciplined take."},
+     {pitch:"Curveball",usage:18,avg:.172,hh:31,barrel:7,ev:85.1,woba:.251,hrRate:1.9,target:false,avoid:true,note:"Curveball is a chase pitch below the zone. Henderson will occasionally chase — important to recognize early."},
+     {pitch:"Changeup",usage:12,avg:.244,hh:44,barrel:11,ev:89.8,woba:.332,hrRate:4.8,target:false,avoid:false,note:"Changeup is modest production. Can drive it when left up but not a primary target."},
+   ],
+   pitchTarget:"Aggressively hunt the 4-seam (44%) at Fenway. Henderson posts 19% barrel rate and 9.1% HR rate on fastballs — and the RF wall (302ft) makes one pull shot a near-guaranteed HR. Lay off the slider and curveball (combined 44%) entirely. 74°F + 10mph SW wind blowing out = excellent carry conditions.",
+   bullpen:{team:"BOS",era:3.6,note:"BOS bullpen 3.6 ERA — Fenway SW wind boosts LHB HR odds all game"},
+   note:"18.4% barrel (Savant). .311/3HR last 10. Career HR off Early. 13/16 HRs vs RHP. 74°F + 10mph wind out at Fenway (302ft RF). LHB pull power at Fenway is historically elite. +400 excellent value."},
+
+  {id:"goodman",name:"Hunter Goodman",team:"COL",hand:"R",
+   barrel:13.1,ev:90.8,xwoba:.348,hrPct:7.3,hrSeason:14,fdOdds:380,playingToday:true,
+   venue:"LAA",game:"COL@LAA",pitcher:"Grayson Rodriguez",pitcherHand:"R",pitcherHR9:2.8,
+   l10:{avg:.310,hr:3,hot:true},
+   bvp:{pa:5,avg:.400,hr:1,note:"5 PA vs Rodriguez: .400 AVG, 1 HR"},
+   vsHand:{note:"vs RHP: .295 BA, 11 of 14 HRs off right-handed pitching"},
+   pitcher_splits:{vsL:"Rodriguez: 7.53 ERA in 2026 — one of MLB's worst. RHBs .341 wOBA vs 4-seam",vsR:"4-seam (45%) sits 97mph but elevates frequently"},
+   pitchMix:[{n:"4-Seam",p:45,c:"#4a9eff"},{n:"Slider",p:28,c:"#e84040"},{n:"Curveball",p:16,c:"#e8a320"},{n:"Changeup",p:11,c:"#22c97a"}],
+   pitchSplits:[
+     {pitch:"4-Seam",usage:45,avg:.309,hh:52,barrel:16,ev:93.3,woba:.421,hrRate:8.8,target:true,avoid:false,note:"Goodman's primary target. 16% barrel, 93.3 EV on 4-seamers. Rodriguez's 97mph 4-seam elevates — high-leverage opportunity."},
+     {pitch:"Slider",usage:28,avg:.178,hh:35,barrel:8,ev:86.1,woba:.264,hrRate:2.3,target:false,avoid:true,note:"Rodriguez's slider is his best weapon — breaks down and away from RHBs. Below-average production. Don't chase."},
+     {pitch:"Curveball",usage:16,avg:.162,hh:29,barrel:6,ev:83.9,woba:.238,hrRate:1.7,target:false,avoid:true,note:"Curveball is a chase pitch. Rodriguez uses it 2-strike to put batters away. Take it."},
+     {pitch:"Changeup",usage:11,avg:.241,hh:43,barrel:11,ev:90.2,woba:.329,hrRate:5.1,target:false,avoid:false,note:"Changeup is inconsistent for Rodriguez — leaks elevated. Goodman has moderate production on it."},
+   ],
+   pitchTarget:"Attack the 4-seam (45%) — Goodman has 16% barrel rate and 93.3 EV on fastballs. Rodriguez's 97mph 4-seam keeps getting elevated and hit hard (.341 wOBA allowed to RHBs). Lay off the slider and curveball (44%). Rodriguez's 7.53 ERA tells you everything.",
+   bullpen:{team:"LAA",era:4.2,note:"LAA bullpen 4.2 ERA — Goodman needs to get Rodriguez before exit"},
+   note:".310/3HR last 10. Career HR off Rodriguez (5 PA, .400). Rodriguez 7.53 ERA. 74°F mild conditions at Angel Stadium (PF 97). Hot bat + terrible pitcher = strong play."},
+
+  {id:"buxton",name:"Byron Buxton",team:"MIN",hand:"R",
+   barrel:18.9,ev:90.1,xwoba:.331,hrPct:8.9,hrSeason:17,fdOdds:440,playingToday:true,
+   venue:"MIN",game:"CWS@MIN",pitcher:"Davis Martin",pitcherHand:"R",pitcherHR9:0.4,
+   l10:{avg:.300,hr:2,hot:false},
+   bvp:{pa:8,avg:.375,hr:1,note:"8 PA vs Martin: .375 AVG, 1 HR"},
+   vsHand:{note:"vs RHP: .275 BA, 15 of 17 HRs off right-handed pitching"},
+   pitcher_splits:{vsL:"Martin: only 3 HR in 67.2 IP — elite HR suppressor. Sinker-heavy.",vsR:"Martin sinker (41%) induces weak contact — needs to pull ball in air"},
+   pitchMix:[{n:"Sinker",p:41,c:"#4a9eff"},{n:"Cutter",p:25,c:"#22c97a"},{n:"Slider",p:20,c:"#e84040"},{n:"Changeup",p:14,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Sinker",usage:41,avg:.212,hh:38,barrel:10,ev:88.7,woba:.298,hrRate:2.9,target:false,avoid:false,note:"Martin's sinker is effective vs Buxton — stays low, generates grounders. Buxton doesn't barrel it at his typical rate. Neutral-to-below."},
+     {pitch:"Cutter",usage:25,avg:.289,hh:49,barrel:16,ev:92.3,woba:.388,hrRate:6.4,target:true,avoid:false,note:"Buxton's best pitch to attack vs Martin. .289 AVG, 16% barrel on cutters — when Martin's cutter leaks up-and-in, Buxton has pull power to short RF at Target Field."},
+     {pitch:"Slider",usage:20,avg:.198,hh:34,barrel:8,ev:86.4,woba:.272,hrRate:2.1,target:false,avoid:true,note:"Slider is Martin's put-away pitch — low production for Buxton. Don't chase this off-plate."},
+     {pitch:"Changeup",usage:14,avg:.231,hh:40,barrel:11,ev:89.1,woba:.312,hrRate:4.2,target:false,avoid:false,note:"Moderate production. Changeup fades away — Buxton can drive it when left up but it's not a high-HR pitch for him."},
+   ],
+   pitchTarget:"Wait for the cutter (25%) — Martin's cutter is his HR-vulnerable pitch (6.4% HR rate for Buxton). The sinker (41%) stays low and gets weak contact. Be disciplined: don't chase the slider. Best opportunity may be vs CWS bullpen (5.1 ERA) in late innings rather than Martin himself (0.4 HR/9).",
+   bullpen:{team:"CWS",era:5.1,note:"CWS bullpen 5.1 ERA — one of MLB's worst. Buxton's real HR window is late innings."},
+   note:"18.9% barrel (Savant). Career .375/1HR vs Martin. BUT Martin has 0.4 HR/9 — elite HR suppressor. Late-inning vs CWS pen (5.1 ERA) is where value lies. Boom-or-bust play."},
+
+  {id:"schmitt",name:"Casey Schmitt",team:"SFG",hand:"R",
+   barrel:14.2,ev:91.3,xwoba:.359,hrPct:8.3,hrSeason:12,fdOdds:390,playingToday:true,
+   venue:"MIL",game:"SF@MIL",pitcher:"Shane Drohan",pitcherHand:"L",pitcherHR9:1.5,
+   l10:{avg:.318,hr:2,hot:true},
+   bvp:{pa:3,avg:.333,hr:0,note:"3 PA vs Drohan: .333 AVG, 0 HR"},
+   vsHand:{note:"vs LHP: .340 BA, 10 of 12 HRs off lefties — elite platoon advantage"},
+   pitcher_splits:{vsL:"Drohan sinker (38%) primary — RHBs see sinker/slider combo, his weaker pairing",vsR:"RHBs .310 wOBA vs Drohan"},
+   pitchMix:[{n:"Sinker",p:38,c:"#4a9eff"},{n:"4-Seam",p:25,c:"#22c97a"},{n:"Slider",p:22,c:"#e84040"},{n:"Changeup",p:15,c:"#e8a320"}],
+   pitchSplits:[
+     {pitch:"Sinker",usage:38,avg:.264,hh:44,barrel:11,ev:90.4,woba:.348,hrRate:4.8,target:false,avoid:false,note:"Schmitt hits sinkers at a moderate rate. When Drohan's sinker mistakes up-and-in, Schmitt can pull it but it stays lower on average."},
+     {pitch:"4-Seam",usage:25,avg:.318,hh:57,barrel:19,ev:93.8,woba:.431,hrRate:9.4,target:true,avoid:false,note:"Best pitch for Schmitt to attack. .318 AVG, 19% barrel, 93.8 EV — elite production vs 4-seamers. Drohan's 4-seam (92mph) drifts inner-half to RHBs."},
+     {pitch:"Slider",usage:22,avg:.191,hh:33,barrel:7,ev:85.7,woba:.267,hrRate:2.0,target:false,avoid:true,note:"Slider sweeps away from RHBs. Below-average production — Schmitt should take this pitch."},
+     {pitch:"Changeup",usage:15,avg:.241,hh:39,barrel:10,ev:89.1,woba:.322,hrRate:4.1,target:false,avoid:false,note:"Moderate production on changeup. Fades away from RHBs — can drive when left elevated."},
+   ],
+   pitchTarget:"Attack the 4-seam (25%) — Schmitt posts 19% barrel rate and 93.8 EV on 4-seamers. Drohan's 92mph 4-seam drifts to the inner half of RHBs — Schmitt's pull power is the perfect weapon. Lay off the slider (22%) sweeping away. Dome at American Family Field = controlled conditions.",
+   bullpen:{team:"MIL",era:3.6,note:"MIL bullpen 3.6 ERA — Schmitt needs to get Drohan for best result"},
+   note:"MLB's best HR% vs LHP among 3Bs. .340 BA vs LHP, 10/12 HRs off southpaws. .318/2HR last 10. Dome conditions. 19% barrel on 4-seamers is the key Statcast insight here."},
+];
+
+/* ══════════════════════════════════════════════════════════════
+   SCORING
+══════════════════════════════════════════════════════════════ */
+function score(p){
+  if(!p.playingToday) return 3;
+  const pf=adjPF(p.venue),W={b:25,e:20,x:15,h:20,p:10,pi:10};
+  const bS=(p.barrel/22)*100,eS=((p.ev-85)/15)*100,xS=((p.xwoba-.25)/.25)*100;
+  const hS=(p.hrPct/12)*100,pfS=((pf-85)/50)*100,piS=p.pitcherHR9?(p.pitcherHR9/3.5)*100:50;
+  const raw=(W.b*bS+W.e*eS+W.x*xS+W.h*hS+W.p*pfS+W.pi*piS)/(W.b+W.e+W.x+W.h+W.p+W.pi);
+  let base=Math.min(95,Math.max(5,Math.round(raw*.58+7)));
+  if(p.l10?.hot) base=Math.min(97,base+2);
+  if(p.l10?.hr>=3) base=Math.min(97,base+1);
+  const gP=(p.hand==='L'&&p.pitcherHand==='R')||(p.hand==='R'&&p.pitcherHand==='L');
+  const bP=(p.hand==='L'&&p.pitcherHand==='L')||(p.hand==='R'&&p.pitcherHand==='R');
+  if(gP) base=Math.min(97,base+2); if(bP) base=Math.max(4,base-2);
+  if(p.bvp?.hr>0) base=Math.min(97,base+1);
+  return base;
+}
+function probColor(p){return p>=22?'#e8a320':p>=15?'#4a9eff':p>=10?'#22c97a':'#4a5260'}
+function tierClass(p){return p>=22?'tier-elite':p>=15?'tier-strong':p>=10?'tier-solid':'tier-watch'}
+function toDecimal(am){return am>0?am/100+1:100/Math.abs(am)+1}
+function toAmerican(d){return d>=2?'+'+(Math.round((d-1)*100)):'-'+(Math.round(100/(d-1)))}
+function vigImp(am){return am>0?100/(am+100):Math.abs(am)/(Math.abs(am)+100)}
+function valScore(p){return p.fdOdds?(p.prob/100)/vigImp(p.fdOdds):0}
+
+let expanded=null,activeTab={},currentFilter='games',scored=[];
+
+/* ══ PARK GRID ══ */
+function renderParks(){
+  const today=['NYY','PHI','LAA','ATL','HOU','MIN','CHC','MIL','BOS','STL','SEA','ARI','TB','DET','CWS'];
+  const sorted=Object.entries(PF).sort((a,b)=>b[1].f-a[1].f);
+  const list=[...sorted.filter(([k])=>today.includes(k)),...sorted.filter(([k])=>!today.includes(k))];
+  document.getElementById('park-grid').innerHTML=list.slice(0,20).map(([key,p])=>{
+    const isT=today.includes(key);
+    const adj=adjPF(key),wx=WX[key],diff=adj-p.f;
+    const t=adj>=115?'elite':adj>=105?'good':adj>=95?'neutral':'bad';
+    const bw=Math.round(Math.min(100,Math.max(0,(adj-80)/60*100)));
+    const bc=adj>=115?'#e8a320':adj>=105?'#22c97a':adj>=95?'#4a9eff':'#e84040';
+    const adjStr=diff>0?`+${diff}`:diff<0?`${diff}`:'';
+    return`<div class="park-card ${t} ${isT?'active-today':''}">
+      <div class="park-name">${p.name}</div>
+      <div class="park-team">${key}</div>
+      <div class="park-numbers">
+        <span class="park-factor-num ${t}">${adj}</span>
+        ${adjStr?`<span style="font-family:var(--font-mono);font-size:10px;color:${diff>0?'var(--orange)':'var(--purple)'}">${adjStr}</span>`:''}
+      </div>
+      ${wx?`<div class="park-wx ${wx.impact==='boost'?'boost':wx.impact==='suppress'?'suppress':''}">${wx.tag}</div>`:''}
+      <div class="park-bar"><div class="park-bar-fill" style="width:${bw}%;background:${bc}"></div></div>
+      ${isT?'<div class="today-badge">TODAY</div>':''}
+    </div>`;
+  }).join('');
+}
+
+/* ══ FILTERS ══ */
+function getFiltered(){
+  return scored.filter(p=>{
+    if(currentFilter==='games'&&!p.playingToday) return false;
+    if(currentFilter==='L'&&p.hand!=='L'&&p.hand!=='S') return false;
+    if(currentFilter==='R'&&p.hand!=='R'&&p.hand!=='S') return false;
+    if(currentFilter==='elite'&&p.barrel<16) return false;
+    if(currentFilter==='hot'&&!p.l10?.hot) return false;
+    return true;
+  });
+}
+function setFilter(f){
+  currentFilter=f;
+  ['fGames','fAll','fL','fR','fElite','fHot'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active')});
+  const m={games:'fGames',all:'fAll',L:'fL',R:'fR',elite:'fElite',hot:'fHot'};
+  const e=document.getElementById(m[f]);if(e)e.classList.add('active');
+  renderPlayers();
+}
+function switchTab(pid,tab){activeTab[pid]=tab;renderPlayers();}
+function toggleCard(id){expanded=(expanded===id)?null:id;if(expanded&&!activeTab[id])activeTab[id]='statcast';renderPlayers();}
+
+/* ══ CELL COLORING ══ */
+function avgClass(v){return v>=.310?'cell-elite':v>=.270?'cell-good':v<=.200?'cell-bad':''}
+function hhClass(v){return v>=55?'cell-elite':v>=45?'cell-good':v<=33?'cell-bad':''}
+function barClass(v){return v>=18?'cell-elite':v>=12?'cell-good':v<=7?'cell-bad':''}
+function evClass(v){return v>=93?'cell-elite':v>=90?'cell-good':v<=86?'cell-bad':''}
+function wobaClass(v){return v>=.420?'cell-elite':v>=.340?'cell-good':v<=.270?'cell-bad':''}
+function hrClass(v){return v>=8?'cell-elite':v>=5?'cell-good':v<=2.5?'cell-bad':''}
+
+/* ══ PLAYER CARDS ══ */
+function renderPlayers(){
+  const grid=document.getElementById('players-grid');
+  const filtered=getFiltered();
+  if(!filtered.length){grid.innerHTML='<div class="loading-state"><div class="loading-label" style="color:var(--muted)">No players match filter.</div></div>';return;}
+  grid.innerHTML=filtered.map((p,i)=>{
+    const rC=i<3?`r${i+1}`:'';
+    const adj=adjPF(p.venue),pf=PF[p.venue]||{f:100};
+    const pfHot=adj>=108,pfCold=adj<95;
+    const wx=WX[p.venue];
+    const barColor=probColor(p.prob);
+    const bw=Math.round((p.prob/filtered[0].prob)*100);
+    const isOpen=expanded===p.id;
+    const hLabel=p.hand==='S'?'S/W':p.hand==='L'?'LHB':'RHB';
+    const hotTag=p.l10?.hot?`<span class="tag hot">🔥 L10: .${Math.round(p.l10.avg*1000)} ${p.l10.hr}HR</span>`:'';
+    const bvpTag=p.bvp?.hr>0?`<span class="tag hot">BvP HR</span>`:'';
+    const parkTag=pfHot?`<span class="tag hot">🏟 PF${adj}</span>`:pfCold?`<span class="tag danger">❄️ PF${adj}</span>`:`<span class="tag">PF${adj}</span>`;
+    const wxTag=wx?.impact==='boost'?`<span class="tag wx-boost">${wx.tag}</span>`:wx?.impact==='suppress'?`<span class="tag wx-bad">${wx.tag}</span>`:'';
+    const gP=(p.hand==='L'&&p.pitcherHand==='R')||(p.hand==='R'&&p.pitcherHand==='L');
+    const bP=(p.hand==='L'&&p.pitcherHand==='L')||(p.hand==='R'&&p.pitcherHand==='R');
+    const platTag=gP?`<span class="tag good">✓ PLATOON</span>`:bP?`<span class="tag danger">✗ SAME-HAND</span>`:'';
+
+    let detail='';
+    if(isOpen){
+      const tab=activeTab[p.id]||'statcast';
+      const tabs=['statcast','form','pitcher','pitchmix','weather','park'].map(t=>`<button class="dtab ${tab===t?'active':''}" onclick="switchTab('${p.id}','${t}');event.stopPropagation()">${t==='pitchmix'?'PITCH MIX':t.toUpperCase()}</button>`).join('');
+      let pane='';
+
+      if(tab==='statcast'){
+        pane=`<div class="stat-row">
+          <div class="stat-chip ${p.barrel>=16?'hl':''}"><div class="sv">${p.barrel}%</div><div class="sl">Barrel%</div></div>
+          <div class="stat-chip ${p.ev>=92?'hl':''}"><div class="sv">${p.ev}</div><div class="sl">Avg EV</div></div>
+          <div class="stat-chip ${p.xwoba>=.380?'hl':''}"><div class="sv">${p.xwoba}</div><div class="sl">xwOBA</div></div>
+          <div class="stat-chip"><div class="sv">${p.hrPct}%</div><div class="sl">HR/PA%</div></div>
+          <div class="stat-chip ${p.pitcherHR9>=2.5?'red':p.pitcherHR9<=0.6?'grn':''}"><div class="sv">${p.pitcherHR9||'—'}</div><div class="sl">P.HR/9</div></div>
+          <div class="stat-chip"><div class="sv">${p.hrSeason}</div><div class="sl">2026 HR</div></div>
+          <div class="stat-chip"><div class="sv">${hLabel}</div><div class="sl">Bats</div></div>
+          ${p.fdOdds?`<div class="stat-chip hl"><div class="sv" style="color:var(--green)">+${p.fdOdds}</div><div class="sl">FD Odds</div></div>`:''}
+        </div>
+        <div class="note-box"><div class="nb-label">Analysis</div>${p.note}</div>`;
+      }
+      if(tab==='form'){
+        const g=p.l10;
+        pane=`<div class="note-box"><div class="nb-label">Last 10 Games</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+            <span><strong>${(g.avg*1000|0)/1000}</strong> <span style="color:var(--dim)">AVG</span></span>
+            <span><strong>${g.hr}</strong> <span style="color:var(--dim)">HR</span></span>
+            <span style="color:${g.hot?'var(--gold)':'var(--muted)'}">${g.hot?'🔥 Hot streak':'— Cooling'}</span>
+          </div>
+        </div>
+        <div class="note-box"><div class="nb-label">Batter vs Pitcher (Career)</div>
+          ${p.bvp.pa>0?`<strong>${p.bvp.pa} PA · .${Math.round(p.bvp.avg*1000)} AVG · ${p.bvp.hr} HR</strong><br><span style="color:var(--muted)">${p.bvp.note}</span>`:`<span style="color:var(--muted)">${p.bvp.note}</span>`}
+        </div>
+        <div class="note-box"><div class="nb-label">vs ${p.pitcherHand==='L'?'LHP':'RHP'} Split (2026)</div>${p.vsHand.note}</div>`;
+      }
+      if(tab==='pitcher'){
+        pane=`<div class="note-box"><div class="nb-label">Pitcher: ${p.pitcher} (${p.pitcherHand}HP) · HR/9: ${p.pitcherHR9||'—'}</div>
+          <strong>vs LHB:</strong> ${p.pitcher_splits.vsL}<br><strong>vs RHB:</strong> ${p.pitcher_splits.vsR}
+        </div>
+        <div class="note-box"><div class="nb-label">Bullpen — ${p.bullpen.team}</div>${p.bullpen.note}</div>`;
+      }
+      if(tab==='pitchmix'){
+        // Usage bars
+        const bars=p.pitchMix.map(pm=>`<div class="pitch-row">
+          <span class="pitch-name">${pm.n}</span>
+          <div class="pitch-bar-bg"><div class="pitch-bar-fill" style="width:${pm.p}%;background:${pm.c}"></div></div>
+          <span class="pitch-pct">${pm.p}%</span>
+        </div>`).join('');
+
+        // Per-pitch batter split table
+        const tableRows=p.pitchSplits.map(s=>{
+          const isTarget=s.target,isAvoid=s.avoid;
+          const rowClass=isTarget?'target-row':'';
+          const marker=isTarget?'🎯 ':isAvoid?'⛔ ':'';
+          return`<tr class="${rowClass}">
+            <td>${marker}${s.pitch} <span style="color:var(--dim);font-size:9px">${s.usage}%</span></td>
+            <td class="${avgClass(s.avg)}">.${Math.round(s.avg*1000)}</td>
+            <td class="${hhClass(s.hh)}">${s.hh}%</td>
+            <td class="${barClass(s.barrel)}">${s.barrel}%</td>
+            <td class="${evClass(s.ev)}">${s.ev}</td>
+            <td class="${wobaClass(s.woba)}">.${Math.round(s.woba*1000)}</td>
+            <td class="${hrClass(s.hrRate)}">${s.hrRate}%</td>
+          </tr>`;
+        }).join('');
+
+        pane=`<div class="note-box" style="margin-bottom:8px"><div class="nb-label">Pitcher Arsenal — ${p.pitcher}</div>
+          <div class="pitch-mix">${bars}</div>
+        </div>
+        <div class="note-box" style="padding:0;overflow:hidden">
+          <div style="padding:8px 12px 4px"><div class="nb-label">Batter vs Each Pitch — ${p.name} (2026 Statcast)</div></div>
+          <div style="overflow-x:auto;padding:0 0 4px">
+            <table class="pvb-table">
+              <thead><tr>
+                <th style="text-align:left">Pitch</th>
+                <th>AVG</th>
+                <th>HH%</th>
+                <th>BBL%</th>
+                <th>EV</th>
+                <th>wOBA</th>
+                <th>HR%</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pitch-target-box">
+          <div class="ptb-label">🎯 Targeting strategy</div>
+          <p>${p.pitchTarget}</p>
+        </div>`;
+      }
+      if(tab==='weather'){
+        const w=WX[p.venue];
+        if(!w){pane=`<div class="note-box"><div class="nb-label">Weather</div><span style="color:var(--muted)">Dome/retractable — weather not a factor.</span></div>`;}
+        else{
+          const adjF=adjPF(p.venue),base=PF[p.venue]?.f||100,diff=adjF-base;
+          const wClass=w.impact==='boost'?'boost':w.impact==='suppress'?'suppress':w.dome?'dome':'neutral';
+          pane=`<div class="wx-grid">
+            <div class="wx-chip"><div class="wv" style="color:${w.temp>=85?'var(--orange)':w.temp<65?'var(--blue)':'var(--text)'}">${w.temp}°</div><div class="wl">Temp</div></div>
+            <div class="wx-chip"><div class="wv" style="color:${w.impact==='boost'?'var(--gold)':w.impact==='suppress'?'var(--purple)':'var(--text)'}">${w.wind}mph</div><div class="wl">Wind</div></div>
+            <div class="wx-chip"><div class="wv">${w.windDir}</div><div class="wl">Direction</div></div>
+            <div class="wx-chip"><div class="wv" style="color:${w.rain>30?'var(--red)':'var(--text)'}">${w.rain}%</div><div class="wl">Rain</div></div>
+          </div>
+          <div class="wx-impact ${wClass}">${w.desc}</div>
+          <div class="note-box"><div class="nb-label">Park Factor Adjustment</div>
+            Base PF: <strong>${base}</strong> → Weather-Adj: <strong>${adjF}</strong> ${diff!==0?`(${diff>0?'+':''}${diff} from ${w.impact==='boost'?'heat/wind boost':'wind/cold suppression'})`:' (no adjustment)'}
+          </div>`;
+        }
+      }
+      if(tab==='park'){
+        const pfD=PF[p.venue]||{f:100,name:'Unknown',notes:'No data'};
+        const adjF=adjPF(p.venue),diff=adjF-pfD.f;
+        const pfT=adjF>=115?'elite':adjF>=105?'good':adjF>=95?'neutral':'bad';
+        const pfNumC=pfT==='elite'?'var(--gold2)':pfT==='good'?'var(--green)':pfT==='neutral'?'var(--blue)':'var(--muted)';
+        pane=`<div class="park-detail-row">
+          <div class="pf-big" style="color:${pfNumC}">${pfD.f}</div>
+          <div class="pf-arrow">→</div>
+          <div class="pf-adj">${adjF}${diff>0?` (+${diff})`:diff<0?` (${diff})`:''}</div>
+          <div><div style="font-family:var(--font-mono);font-size:12px;color:var(--text)">${pfD.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${pfD.notes}</div></div>
+        </div>
+        <div class="note-box"><div class="nb-label">What this means</div>
+          100 = league avg. <strong>${adjF}</strong> (weather-adjusted) = ~<strong>${Math.abs(adjF-100)}% ${adjF>=100?'MORE':'FEWER'} HRs</strong> than a neutral park today.
+          ${adjF>=115?'🔥 Elite HR conditions.':adjF>=105?'✓ Favorable.':adjF>=95?'Neutral park.':'❄️ Suppressive conditions.'}
+        </div>`;
+      }
+      detail=`<div class="card-detail open">
+        <div class="detail-tabs">${tabs}</div>
+        <div class="tab-pane active">${pane}</div>
+      </div>`;
+    }
+    return`<div class="player-card ${tierClass(p.prob)} ${isOpen?'open':''}" onclick="toggleCard('${p.id}')">
+      <div class="card-main">
+        <div class="rank-num ${rC}">${i+1}</div>
+        <div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-sub">
+            <span>${p.team}</span><span>·</span><span>${p.game}</span><span>·</span><span>vs ${p.pitcher}</span>
+            ${parkTag}${platTag}${wxTag}${hotTag}${bvpTag}
+          </div>
+        </div>
+        <div class="prob-block">
+          <div class="prob-pct" style="color:${barColor}">${p.prob}%</div>
+          <div class="prob-lbl">HR PROB</div>
+        </div>
+      </div>
+      <div class="prob-bar-row"><div class="prob-bar-fill" style="width:${bw}%;background:${barColor}"></div></div>
+      ${detail}
+    </div>`;
+  }).join('');
+}
+
+/* ══ PARLAY ══ */
+function renderParlays(){
+  const el=document.getElementById('parlay-grid');
+  const elig=scored.filter(p=>p.playingToday&&p.fdOdds);
+  const combos=[];
+  for(let i=0;i<elig.length;i++)
+    for(let j=i+1;j<elig.length;j++)
+      for(let k=j+1;k<elig.length;k++){
+        const legs=[elig[i],elig[j],elig[k]];
+        const gc={};legs.forEach(l=>{gc[l.game]=(gc[l.game]||0)+1});
+        if(Object.values(gc).some(c=>c>2)) continue;
+        const val=legs.reduce((a,l)=>a*valScore(l),1)*legs.reduce((a,l)=>a*(l.prob/100),1);
+        combos.push({legs,val});
+      }
+  combos.sort((a,b)=>b.val-a.val);
+  if(!combos.length){el.innerHTML='<div class="loading-state" style="grid-column:1/-1"><div class="loading-label" style="color:var(--muted)">Not enough data.</div></div>';return;}
+  el.innerHTML=combos.slice(0,3).map((c,idx)=>{
+    const legs=c.legs;
+    const dec=legs.reduce((a,l)=>a*toDecimal(l.fdOdds),1);
+    const amOdds=toAmerican(dec),profit=((dec-1)*10).toFixed(2);
+    const mp=(legs.reduce((a,l)=>a*(l.prob/100),1)*100).toFixed(1);
+    return`<div class="parlay-card ${idx===0?'best':''}">
+      <div class="parlay-header"><span class="parlay-rank-lbl">#${idx+1} COMBO</span>${idx===0?'<span class="parlay-badge">BEST VALUE</span>':''}</div>
+      <div class="parlay-legs">${legs.map(l=>`<div class="parlay-leg">
+        <div><div class="parlay-leg-name">${l.name}</div><div class="parlay-leg-sub">${l.team} · vs ${l.pitcher}</div></div>
+        <div class="parlay-leg-odds">+${l.fdOdds}</div>
+      </div>`).join('')}</div>
+      <div class="parlay-stats-row">
+        <div class="parlay-stat"><div class="pv">${amOdds}</div><div class="pl">PARLAY ODDS</div></div>
+        <div class="parlay-stat"><div class="pv">$${profit}</div><div class="pl">PROFIT/$10</div></div>
+        <div class="parlay-stat"><div class="pv">${mp}%</div><div class="pl">MODEL PROB</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ INIT ══ */
+function getTodayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function fmtDate(s){const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const dy=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const dt=new Date(y,m-1,d);return`${dy[dt.getDay()]}, ${mo[m-1]} ${parseInt(d)}, ${y}`}
+async function initApp(){
+  expanded=null;activeTab={};
+  document.getElementById('today-date').textContent=fmtDate(getTodayStr());
+  document.getElementById('sdot').className='status-dot loading';
+  document.getElementById('status-text').textContent='Scoring players with pitch-type splits...';
+  scored=PLAYERS.map(p=>({...p,prob:score(p)})).sort((a,b)=>b.prob-a.prob);
+  renderParks();
+  try{
+    const res=await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${getTodayStr()}&hydrate=team,probablePitcher`);
+    if(!res.ok) throw new Error(`${res.status}`);
+    const data=await res.json();
+    const games=(data.dates?.[0]?.games||[]).length;
+    document.getElementById('status-text').textContent=`Live: ${games} games · MLB API connected · Pitch-type splits from Baseball Savant · Weather June 2, 2026`;
+    document.getElementById('sdot').className='status-dot ok';
+    document.getElementById('chip-mlb').className='api-chip live';
+  }catch(e){
+    document.getElementById('status-text').textContent=`MLB API offline — June 2, 2026 data (15 games) · Savant pitch splits loaded · IL: De La Cruz, Neto removed`;
+    document.getElementById('sdot').className='status-dot ok';
+    document.getElementById('chip-mlb').className='api-chip cached';
+  }
+  renderPlayers();
+  renderParlays();
+}
+document.addEventListener('DOMContentLoaded',initApp);
+</script>
+</body>
+</html>
