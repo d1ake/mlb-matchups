@@ -1,0 +1,13 @@
+{
+  "_help": "Actual home-run outcomes. Key = \"<DATA_DATE>:<playerId>\". Value = 1 if that batter hit a HR in that game, 0 if not, null if not yet known. Keys starting with _ are ignored. Add a new block of keys for each new slate you record.",
+  "2026-06-02:judge": null,
+  "2026-06-02:rice": null,
+  "2026-06-02:schwarber": null,
+  "2026-06-02:alvarez": null,
+  "2026-06-02:kurtz": null,
+  "2026-06-02:guerrero": null,
+  "2026-06-02:henderson": null,
+  "2026-06-02:goodman": null,
+  "2026-06-02:buxton": null,
+  "2026-06-02:schmitt": null
+}

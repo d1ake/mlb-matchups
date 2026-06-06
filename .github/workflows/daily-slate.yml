@@ -1,0 +1,38 @@
+name: Daily slate
+
+# Rebuilds data.js every morning with today's real stats, then commits it so
+# GitHub Pages serves fresh numbers. Cron is in UTC.
+#   13:00 UTC ≈ 9:00 AM ET. Move it LATER if probable pitchers aren't posted yet,
+#   EARLIER for west-coast mornings. You can also trigger it by hand below.
+on:
+  schedule:
+    - cron: '0 13 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build today's data.js
+        run: node build-slate.js
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "barreliq-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if ! git diff --quiet -- data.js; then
+            git add data.js
+            git commit -m "data: auto slate $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "No change to data.js — nothing to commit."
+          fi
