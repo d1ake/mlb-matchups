@@ -38,6 +38,7 @@ function vigImp(am){return am>0?100/(am+100):Math.abs(am)/(Math.abs(am)+100)}
 function valScore(p){return p.fdOdds?(p.prob/100)/vigImp(p.fdOdds):0}
 
 let expanded=null,activeTab={},currentFilter='games',scored=[];
+let rosterSortKey='rating',rosterSortDir=-1;   // full-slate table sort state
 
 /* ══ PARK GRID ══ */
 function renderParks(){
@@ -303,22 +304,192 @@ function renderParlays(){
   }).join('');
 }
 
+/* ══ FULL SLATE TABLE (all qualified hitters, sortable) ══ */
+function rosterSort(key){
+  if(rosterSortKey===key) rosterSortDir*=-1;
+  else { rosterSortKey=key; rosterSortDir=(key==='name'||key==='team')?1:-1; }
+  renderRoster();
+}
+function renderRoster(){
+  const wrap=document.getElementById('roster-wrap');
+  if(!wrap) return;
+  if(typeof ROSTER==='undefined'||!Array.isArray(ROSTER)||!ROSTER.length){
+    wrap.innerHTML='<div class="loading-state"><div class="loading-label" style="color:var(--muted)">Full slate appears after the next daily build.</div></div>';
+    return;
+  }
+  const rows=ROSTER.map(p=>({...p,rating:score(p)}));
+  const k=rosterSortKey,dir=rosterSortDir;
+  rows.sort((a,b)=>{
+    let x=a[k],y=b[k];
+    if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
+    return ((x??0)-(y??0))*dir;
+  });
+  const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR']];
+  const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
+  const head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
+  const body=rows.map(p=>{
+    const c=probColor(p.rating);
+    return`<tr>
+      <td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
+      <td class="slate-name">${p.name}</td>
+      <td>${p.team}</td>
+      <td class="slate-match">${p.game||'—'}${p.pitcher&&p.pitcher!=='TBD'?` · vs ${p.pitcher}`:''}</td>
+      <td class="num">${p.barrel??'—'}</td>
+      <td class="num">${p.ev??'—'}</td>
+      <td class="num">${p.xwoba!=null?'.'+Math.round(p.xwoba*1000):'—'}</td>
+      <td class="num">${p.hrSeason??0}</td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML=`<div class="slate-count">${rows.length} qualified hitters</div>
+    <div class="slate-scroll"><table class="slate-table">
+      <thead><tr>${head}</tr></thead><tbody>${body}</tbody>
+    </table></div>`;
+}
+
 /* ══ INIT ══ */
 function fmtDate(s){const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const dy=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const dt=new Date(y,m-1,d);return`${dy[dt.getDay()]}, ${mo[m-1]} ${parseInt(d)}, ${y}`}
-function initApp(){
-  expanded=null;activeTab={};
-  // Show the snapshot's own date — the data is static, so the UI must not imply "today".
-  document.getElementById('today-date').textContent=fmtDate(DATA_DATE);
-  document.getElementById('sdot').className='status-dot loading';
-  document.getElementById('status-text').textContent='Scoring players with pitch-type splits...';
-  scored=PLAYERS.map(p=>({...p,prob:score(p)})).sort((a,b)=>b.prob-a.prob);
+
+// Local date as YYYY-MM-DD (matches DATA_DATE format and how MLB keys schedules).
+function localISODate(){const d=new Date();const p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+
+// Full-name -> YOUR abbreviation convention (matches PF/WX/PLAYERS keys: ARI, ATH, CWS, WSH...).
+// We prefer this over the API's own abbreviation field, which uses different codes (AZ, OAK).
+const TEAM_MAP={
+  "Arizona Diamondbacks":"ARI","Atlanta Braves":"ATL","Baltimore Orioles":"BAL","Boston Red Sox":"BOS",
+  "Chicago Cubs":"CHC","Chicago White Sox":"CWS","Cincinnati Reds":"CIN","Cleveland Guardians":"CLE",
+  "Colorado Rockies":"COL","Detroit Tigers":"DET","Houston Astros":"HOU","Kansas City Royals":"KC",
+  "Los Angeles Angels":"LAA","Los Angeles Dodgers":"LAD","Miami Marlins":"MIA","Milwaukee Brewers":"MIL",
+  "Minnesota Twins":"MIN","New York Mets":"NYM","New York Yankees":"NYY","Philadelphia Phillies":"PHI",
+  "Pittsburgh Pirates":"PIT","San Diego Padres":"SD","San Francisco Giants":"SF","Seattle Mariners":"SEA",
+  "St. Louis Cardinals":"STL","Tampa Bay Rays":"TB","Texas Rangers":"TEX","Toronto Blue Jays":"TOR",
+  "Washington Nationals":"WSH",
+  "Athletics":"ATH","Oakland Athletics":"ATH","Sacramento Athletics":"ATH"
+};
+function resolveAbbr(team){
+  if(!team) return '';
+  const raw=TEAM_MAP[(team.name||'').trim()] || team.abbreviation || team.name || '';
+  return String(raw).trim().toUpperCase();
+}
+
+/* ══ LIVE SCHEDULE LAYER (best-effort; never blocks rendering) ══ */
+// Today's real MLB slate, fetched client-side. Returns {teams:Set, gameCount}.
+// Throws on network/HTTP failure so the caller can fall back to the curated snapshot.
+async function fetchTodaySlate(dateStr){
+  const url=`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}`;
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),8000); // never hang on a stalled request
+  let data;
+  try{
+    const res=await fetch(url,{signal:ctrl.signal});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    data=await res.json();
+  } finally { clearTimeout(timer); }
+  const games=data?.dates?.[0]?.games || [];
+  const teams=new Set();
+  games.forEach(g=>{
+    const h=resolveAbbr(g?.teams?.home?.team), a=resolveAbbr(g?.teams?.away?.team);
+    if(h) teams.add(h);
+    if(a) teams.add(a);
+  });
+  return { teams, gameCount: games.length };
+}
+
+/* ══ SLATE STATE ══ */
+let TODAY_TEAMS=null;     // Set of today's live teams, or null when using the curated snapshot
+let SLATE_DATE=DATA_DATE; // date shown in the header
+let LIVE_GAMES=null;      // today's live game count
+let SELECTED_DATE=null;   // date chosen in the picker; null = use today's real date
+
+// The date we actually fetch: the picked date if set, otherwise today.
+function targetDate(){ return SELECTED_DATE || localISODate(); }
+
+// Build `scored` from the curated PLAYERS. Ratings ALWAYS use your curated data
+// (score reads the curated fields); only the playingToday flag is overlaid from
+// the live slate so "ACTIVE TODAY" reflects who's really playing today.
+function buildScored(){
+  scored = PLAYERS.map(p=>{
+    const prob = score(p);                                   // curated rating, untouched
+    const active = TODAY_TEAMS ? TODAY_TEAMS.has(p.team) : p.playingToday;
+    return { ...p, prob, playingToday: active };
+  }).sort((a,b)=>b.prob-a.prob);
+}
+
+function paint(){
+  buildScored();
+  const activeCount = scored.filter(p=>p.playingToday).length;
+  document.getElementById('today-date').textContent = fmtDate(SLATE_DATE);
+  document.getElementById('sdot').className = 'status-dot ok';
+  const st = document.getElementById('status-text');
+  const mlbChip = document.getElementById('chip-mlb');
+  if(TODAY_TEAMS){
+    if(LIVE_GAMES===0){
+      st.textContent = `No MLB games scheduled on ${fmtDate(SLATE_DATE)} — your players are under ALL PLAYERS`;
+    } else if(activeCount){
+      st.textContent = `Live · ${fmtDate(SLATE_DATE)} · ${LIVE_GAMES} MLB games · ${activeCount} tracked player(s) active`;
+    } else {
+      st.textContent = `Live · ${fmtDate(SLATE_DATE)} · ${LIVE_GAMES} MLB games · none of your tracked players that day — tap ALL PLAYERS`;
+    }
+    if(mlbChip) mlbChip.className = 'api-chip live';
+  } else {
+    st.textContent = `Curated slate · ${fmtDate(SLATE_DATE)} · ${activeCount} players · Statcast model active`;
+    if(mlbChip) mlbChip.className = 'api-chip cached';
+  }
+  ['chip-savant','chip-parks','chip-wx'].forEach(id=>{const e=document.getElementById(id); if(e) e.className='api-chip cached';});
   renderParks();
-  // All data is a hand-curated static snapshot — report it honestly, no "live" claims.
-  const games=Object.keys(WX).length;
-  document.getElementById('status-text').textContent=`Static snapshot · ${fmtDate(DATA_DATE)} · ${games} games · Statcast splits & weather cached · IL: De La Cruz, Neto removed`;
-  document.getElementById('sdot').className='status-dot ok';
-  ['chip-mlb','chip-savant','chip-parks','chip-wx'].forEach(id=>{const e=document.getElementById(id);if(e)e.className='api-chip cached';});
   renderPlayers();
   renderParlays();
+  renderRoster();
 }
-document.addEventListener('DOMContentLoaded',initApp);
+
+async function refreshLiveSlate(explicit=false){
+  const date = targetDate();
+  try{
+    const slate = await fetchTodaySlate(date);
+    // On a normal auto-load, an off-day (no games) falls back to the curated demo.
+    // When the user explicitly picks a date, always show that date's real result.
+    if(!slate.teams.size && !explicit) return;
+    TODAY_TEAMS = slate.teams;   // may be an empty Set for a picked off-day
+    SLATE_DATE  = date;
+    LIVE_GAMES  = slate.gameCount;
+    paint();                     // re-render with the chosen day's real slate
+  }catch(e){
+    console.warn('Live MLB schedule unavailable — showing curated snapshot.', e);
+    if(explicit){
+      const st=document.getElementById('status-text');
+      if(st) st.textContent = `Couldn't load the schedule for ${fmtDate(date)} — showing curated snapshot.`;
+    }
+    // Baseline is already on screen; nothing else to do. App never hangs.
+  }
+}
+
+// Called when the date picker changes. Empty value clears the override (back to today).
+function onDatePick(value){
+  SELECTED_DATE = value || null;
+  const st=document.getElementById('status-text'), dot=document.getElementById('sdot');
+  if(st) st.textContent = `Loading ${fmtDate(targetDate())}…`;
+  if(dot) dot.className = 'status-dot loading';
+  refreshLiveSlate(true);
+}
+
+function initApp(){
+  // Guard: if data.js didn't load, fail visibly instead of spinning forever.
+  if (typeof PLAYERS === 'undefined' || typeof WX === 'undefined') {
+    const s=document.getElementById('status-text'), d=document.getElementById('sdot');
+    if(s) s.textContent='Error: data.js failed to load.';
+    if(d) d.className='status-dot';
+    return;
+  }
+  // Reset transient view state, but KEEP any date the user picked so REFRESH re-fetches it.
+  expanded=null; activeTab={}; currentFilter='games';
+  TODAY_TEAMS=null; SLATE_DATE=DATA_DATE; LIVE_GAMES=null;
+  paint();
+  // Sync the picker to the active target date (today, or the previously picked date).
+  const dp=document.getElementById('date-picker'); if(dp) dp.value=targetDate();
+  // Then overlay the real slate, best-effort. Failure leaves the snapshot intact.
+  refreshLiveSlate(SELECTED_DATE!==null);
+  window.initAppRan=true;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!window.initAppRan) initApp();
+});
