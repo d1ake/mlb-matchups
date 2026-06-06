@@ -213,25 +213,45 @@ function assembleData(inputs){
     };
   });
 
-  return { DATA_DATE:date, PF, WX, PLAYERS };
+  // Full slate: EVERY qualified hitter on a playing team (lean rows for the
+  // sortable table). Same matchup context; no l10/bvp (kept light — the score
+  // still computes, just without the small recent-form/BvP nudges).
+  const ROSTER=[];
+  for(const team of Object.keys(byTeam)){
+    for(const b of byTeam[team]){
+      const opp=oppByTeam[b.teamAbbr]||{};
+      ROSTER.push({
+        id:b.id, name:b.name, team:b.teamAbbr, hand:b.hand||"R",
+        barrel:round(b.barrel,1), ev:round(b.ev,1), xwoba:round(b.xwoba,3),
+        hrPct:(b.hr!=null&&b.pa)?round(b.hr/b.pa*100,1):0, hrSeason:b.hr??0,
+        playingToday:true, venue:opp.venue||b.teamAbbr, game:opp.game||"",
+        pitcher:opp.name||"TBD", pitcherHand:opp.hand||"R",
+        pitcherHR9:opp.hr9!=null?round(opp.hr9,1):0
+      });
+    }
+  }
+
+  return { DATA_DATE:date, PF, WX, PLAYERS, ROSTER };
 }
 
 /* ── Serialize to a data.js identical in shape to the hand-built one ────── */
-function toDataJs({DATA_DATE,PF,WX,PLAYERS}){
+function toDataJs({DATA_DATE,PF,WX,PLAYERS,ROSTER}){
   const J = o => JSON.stringify(o);
-  const players = PLAYERS.map(p =>
-    "  "+J(p)
-  ).join(",\n");
+  const players = PLAYERS.map(p => "  "+J(p)).join(",\n");
+  const roster = (ROSTER||[]).map(p => "  "+J(p)).join(",\n");
   return `/* ══════════════════════════════════════════════════════════
    BarrelIQ — DATA (auto-generated ${DATA_DATE})
    Built by build-slate.js from MLB Stats API + Baseball Savant + Open-Meteo.
-   Defines globals: DATA_DATE, PF, WX, PLAYERS  — must load before app.js
+   Defines globals: DATA_DATE, PF, WX, PLAYERS, ROSTER  — load before app.js
 ══════════════════════════════════════════════════════════ */
 const DATA_DATE=${J(DATA_DATE)};
 const PF=${J(PF)};
 const WX=${J(WX)};
 const PLAYERS=[
 ${players}
+];
+const ROSTER=[
+${roster}
 ];
 `;
 }
