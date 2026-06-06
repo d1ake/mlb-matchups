@@ -27,7 +27,10 @@ function score(p){
 // Tier bands for the 0-100 Rating. Calibrated to the rating's realistic active-hitter
 // range (~30-65), NOT absolute 0-100 quartiles, so the slate spreads across tiers:
 // >=52 elite · 44-51 strong · 36-43 solid · <36 watch.
-function probColor(p){return p>=52?'#e8a320':p>=44?'#4a9eff':p>=36?'#22c97a':'#4a5260'}
+// Colors MUST mirror the .tier-* border colors in styles.css so every tier indicator
+// (number, bar fill, card border) shows one color per tier:
+// elite=--gold #e8a320 · strong=--green #22c97a · solid=--blue #4a9eff · watch=--dim #4a5260
+function probColor(p){return p>=52?'#e8a320':p>=44?'#22c97a':p>=36?'#4a9eff':'#4a5260'}
 function tierClass(p){return p>=52?'tier-elite':p>=44?'tier-strong':p>=36?'tier-solid':'tier-watch'}
 function toDecimal(am){return am>0?am/100+1:100/Math.abs(am)+1}
 function toAmerican(d){return d>=2?'+'+(Math.round((d-1)*100)):'-'+(Math.round(100/(d-1)))}
