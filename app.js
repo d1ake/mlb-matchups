@@ -250,8 +250,9 @@ function renderPlayers(){
           </div>
         </div>
         <div class="prob-block">
-          <div class="prob-pct" style="color:${barColor}">${p.prob}%</div>
-          <div class="prob-lbl">HR PROB</div>
+          <div class="prob-pct" style="color:${barColor}">${p.prob}</div>
+          <div class="prob-lbl">RATING /100</div>
+          ${p.fdOdds?`<div class="mkt-implied">Mkt +${p.fdOdds} · ${Math.round(vigImp(p.fdOdds)*100)}% impl.</div>`:''}
         </div>
       </div>
       <div class="prob-bar-row"><div class="prob-bar-fill" style="width:${bw}%;background:${barColor}"></div></div>
@@ -290,7 +291,7 @@ function renderParlays(){
       <div class="parlay-stats-row">
         <div class="parlay-stat"><div class="pv">${amOdds}</div><div class="pl">PARLAY ODDS</div></div>
         <div class="parlay-stat"><div class="pv">$${profit}</div><div class="pl">PROFIT/$10</div></div>
-        <div class="parlay-stat"><div class="pv">${mp}%</div><div class="pl">MODEL PROB</div></div>
+        <div class="parlay-stat"><div class="pv">${mp}</div><div class="pl">MODEL SCORE</div></div>
       </div>
     </div>`;
   }).join('');

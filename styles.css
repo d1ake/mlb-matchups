@@ -24,6 +24,8 @@ header{padding:32px 0 0;margin-bottom:28px}
 .api-chip.cached{color:var(--gold);border-color:var(--gold)}
 .section-title{font-family:var(--font-disp);font-size:22px;letter-spacing:.06em;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-title::before{content:'';display:inline-block;width:4px;height:20px;background:var(--gold);border-radius:2px}
+.section-note{font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--muted);margin-top:-6px;margin-bottom:16px;max-width:760px}
+.section-note strong{color:var(--text)}
 .park-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:24px}
 .park-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px;position:relative;overflow:hidden}
 .park-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
@@ -62,6 +64,7 @@ header{padding:32px 0 0;margin-bottom:28px}
 .prob-block{text-align:right}
 .prob-pct{font-family:var(--font-disp);font-size:32px;line-height:1}
 .prob-lbl{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.05em}
+.mkt-implied{font-family:var(--font-mono);font-size:10px;color:var(--dim);letter-spacing:.03em;margin-top:3px}
 .prob-bar-row{height:3px;background:var(--surface2);border-radius:2px;margin-top:10px;overflow:hidden}
 .prob-bar-fill{height:100%;border-radius:2px}
 .card-detail{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
