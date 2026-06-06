@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarrelIQ — Daily HR Matchup Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="header-top">
+    <div class="logo"><span>DAILY MATCHUP ENGINE</span>BarrelIQ</div>
+    <div class="header-meta">
+      <div class="date-badge" id="today-date">—</div>
+      <button class="refresh-btn" onclick="initApp()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.86 4.4 2.2M13.5 2.5v2.8h-2.8"/></svg>
+        REFRESH
+      </button>
+    </div>
+  </div>
+  <div class="header-rule"></div>
+</header>
+<div class="status-bar">
+  <div class="status-dot loading" id="sdot"></div>
+  <span id="status-text">Loading...</span>
+  <div class="api-chips">
+    <span class="api-chip" id="chip-mlb">MLB API</span>
+    <span class="api-chip cached" id="chip-savant">SAVANT</span>
+    <span class="api-chip live" id="chip-parks">PARKS</span>
+    <span class="api-chip live" id="chip-wx">WEATHER</span>
+  </div>
+</div>
+<div class="section-title">Ballpark HR Factors — Weather-Adjusted · Today's Games First</div>
+<div class="park-grid" id="park-grid"></div>
+<div class="controls">
+  <button class="ctrl-btn active" id="fGames" onclick="setFilter('games')">ACTIVE TODAY</button>
+  <button class="ctrl-btn" id="fAll" onclick="setFilter('all')">ALL PLAYERS</button>
+  <span class="ctrl-sep">|</span>
+  <button class="ctrl-btn" id="fL" onclick="setFilter('L')">LHB</button>
+  <button class="ctrl-btn" id="fR" onclick="setFilter('R')">RHB</button>
+  <span class="ctrl-sep">|</span>
+  <button class="ctrl-btn" id="fElite" onclick="setFilter('elite')">ELITE BARREL (≥16%)</button>
+  <button class="ctrl-btn" id="fHot" onclick="setFilter('hot')">HOT LAST 10</button>
+</div>
+<div class="section-title">HR Probability Rankings — Click for Deep Dive</div>
+<div class="players-grid" id="players-grid">
+  <div class="loading-state"><div class="spinner"></div><div class="loading-label">Building matchup model...</div></div>
+</div>
+<div class="parlay-section">
+  <div class="section-title">Optimized 3-Leg Parlays</div>
+  <div class="parlay-grid" id="parlay-grid">
+    <div class="loading-state" style="grid-column:1/-1"><div class="loading-label">Calculating value...</div></div>
+  </div>
+</div>
+</div>
+<div class="wrap">
+<footer>
+  <strong style="color:var(--muted)">BarrelIQ</strong> — Updated June 2, 2026 · Statcast sourced live from baseballsavant.mlb.com · Pitch-type splits: Baseball Savant / FanGraphs pitch-type leaderboard · IL removed: De La Cruz (hamstring), Neto (neck) · Weather: Covers.com · For entertainment only.
+</footer>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
