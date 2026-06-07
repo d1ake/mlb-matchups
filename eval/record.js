@@ -1,48 +1,61 @@
 'use strict';
 /* ══════════════════════════════════════════════════════════════════════
-   BarrelIQ — record.js
-   Capture the model's outputs (one record per player/game) into a growing
-   prediction log, eval/predictions.jsonl. Run this for each daily slate.
+   BarrelIQ — record.js   (run once per day, by the daily workflow)
+   Snapshots today's predictions (one row per rostered hitter) into
+   eval/predictions.jsonl so they can be graded against real HR outcomes later.
 
-   Idempotent per snapshot date: re-running replaces that date's rows so you
-   never get duplicates. Outcomes start null and are filled in later (via
-   eval/outcomes.json or by editing actualHR) once the games are final.
+   Predictions CANNOT be reconstructed after the fact (the model's inputs change
+   as season stats update), so this must run every day to build a sample.
+   Outcomes start null and get filled in later by grade.js.
 
-     usage:  node eval/record.js
+   Standalone: reads the live data.js + app.js, runs the REAL score(), so the
+   recorded rating always matches what ships. No dependency on the model internals.
    ══════════════════════════════════════════════════════════════════════ */
-const {
-  loadModel, impliedFromOdds, ratingToProb, readPredictions, writePredictions, PRED_PATH,
-} = require('./lib');
+const fs = require('fs');
+const path = require('path');
 
-const m = loadModel();
-const date = m.DATA_DATE;
-const slate = m.PLAYERS.filter(p => p.playingToday);
+const ROOT = path.resolve(__dirname, '..');
+const PRED_PATH = path.join(__dirname, 'predictions.jsonl');
+
+// Load the production data + scorer without modifying or duplicating them.
+const data = fs.readFileSync(path.join(ROOT, 'data.js'), 'utf8');
+const app  = fs.readFileSync(path.join(ROOT, 'app.js'),  'utf8');
+global.document = { addEventListener() {} };   // app.js registers a DOM handler at load
+global.window = {};
+let M;
+try {
+  (0, eval)(
+    data + '\n' + app +
+    '\n;globalThis.__bq={PLAYERS,ROSTER:(typeof ROSTER!=="undefined"?ROSTER:[]),DATA_DATE,score};'
+  );
+  M = globalThis.__bq;
+} finally {
+  delete globalThis.__bq; delete global.document; delete global.window;
+}
+
+const date = M.DATA_DATE;
+// Record the full roster when available (best for calibration), else the cards.
+const slate = (M.ROSTER && M.ROSTER.length ? M.ROSTER : M.PLAYERS).filter(p => p.playingToday);
 
 const recs = slate.map(p => {
-  const rating = m.score(p); // the REAL production score()
+  const rating = M.score(p);                 // the REAL production score()
   return {
     date,
     id: p.id, name: p.name, team: p.team, venue: p.venue, game: p.game,
     pitcher: p.pitcher, hand: p.hand, pitcherHand: p.pitcherHand,
     rating,
-    modelProb: +ratingToProb(rating).toFixed(4),       // eval-only rating->prob map
-    marketOdds: p.fdOdds != null ? p.fdOdds : null,
-    marketImplied: p.fdOdds != null ? +impliedFromOdds(p.fdOdds).toFixed(4) : null,
-    actualHR: null, // fill in once known (or via eval/outcomes.json keyed "<date>:<id>")
+    modelProb: +Math.max(0, Math.min(1, rating / 100)).toFixed(4), // naive map; calibrate later
+    actualHR: null,                          // filled by grade.js once games are final
   };
 });
 
-const kept = readPredictions().filter(r => r.date !== date); // drop prior rows for this date
-writePredictions([...kept, ...recs]);
+// Append-only log, idempotent per date (re-running a date replaces its rows).
+let kept = [];
+if (fs.existsSync(PRED_PATH)) {
+  kept = fs.readFileSync(PRED_PATH, 'utf8').split('\n').filter(Boolean)
+    .map(JSON.parse).filter(r => r.date !== date);
+}
+fs.writeFileSync(PRED_PATH, [...kept, ...recs].map(r => JSON.stringify(r)).join('\n') + '\n');
 
-console.log(`Recorded ${recs.length} predictions for ${date} -> ${PRED_PATH}`);
-console.log('rank  rating  modelP   mktImpl  player');
-recs.slice().sort((a, b) => b.rating - a.rating).forEach((r, i) => {
-  console.log(
-    String(i + 1).padStart(3), ' ',
-    String(r.rating).padStart(5), ' ',
-    (r.modelProb * 100).toFixed(1).padStart(5) + '%', ' ',
-    (r.marketImplied != null ? (r.marketImplied * 100).toFixed(1) + '%' : '   n/a').padStart(6), ' ',
-    r.name,
-  );
-});
+console.log(`[record] ${recs.length} predictions for ${date} -> ${PRED_PATH}`);
+console.log(`[record] log now holds ${kept.length + recs.length} rows across all dates`);
