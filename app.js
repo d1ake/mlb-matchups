@@ -324,11 +324,12 @@ function renderRoster(){
     if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
     return ((x??0)-(y??0))*dir;
   });
-  const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR']];
+  const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
   const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
-  const head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
+  const head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
   const body=rows.map(p=>{
     const c=probColor(p.rating);
+    const hot5=p.hr5!=null&&p.hr5>=2;
     return`<tr>
       <td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
       <td class="slate-name">${p.name}</td>
@@ -338,6 +339,8 @@ function renderRoster(){
       <td class="num">${p.ev??'—'}</td>
       <td class="num">${p.xwoba!=null?'.'+Math.round(p.xwoba*1000):'—'}</td>
       <td class="num">${p.hrSeason??0}</td>
+      <td class="num"${hot5?' style="color:var(--gold2)"':''}>${p.hr5!=null?p.hr5:'—'}</td>
+      <td class="num">${p.avg5!=null?'.'+String(Math.round(p.avg5*1000)).padStart(3,'0'):'—'}</td>
     </tr>`;
   }).join('');
   wrap.innerHTML=`<div class="slate-count">${rows.length} qualified hitters</div>
