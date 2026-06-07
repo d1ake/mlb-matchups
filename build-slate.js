@@ -100,6 +100,14 @@ const pitchColor = n => PITCH_COLOR[n] || "#7a8394";
 
 /* ── Small helpers ────────────────────────────────────────────────────── */
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
+// Run async fn over items with at most `n` in flight (keeps the build quick + gentle).
+async function mapPool(items, n, fn){
+  const q=items.slice(); const workers=[];
+  for(let i=0;i<Math.min(n,q.length);i++){
+    workers.push((async()=>{ while(q.length){ await fn(q.shift()); } })());
+  }
+  await Promise.all(workers);
+}
 const round = (v,d=1) => v==null ? null : Math.round(v*10**d)/10**d;
 const compass = deg => ["N","NE","E","SE","S","SW","W","NW"][Math.round(((deg||0)%360)/45)%8];
 
@@ -131,7 +139,7 @@ function parseCSV(text){
    }
    ══════════════════════════════════════════════════════════════════════ */
 function assembleData(inputs){
-  const { date, games, batters, weatherByPark={}, l10ById={}, bvpById={} } = inputs;
+  const { date, games, batters, weatherByPark={}, l10ById={}, bvpById={}, recentById={} } = inputs;
 
   // Home parks hosting today -> WX (renderParks reads Object.keys(WX) as "today").
   const WX = {};
@@ -220,10 +228,12 @@ function assembleData(inputs){
   for(const team of Object.keys(byTeam)){
     for(const b of byTeam[team]){
       const opp=oppByTeam[b.teamAbbr]||{};
+      const r=recentById[b.id]||{};
       ROSTER.push({
         id:b.id, name:b.name, team:b.teamAbbr, hand:b.hand||"R",
         barrel:round(b.barrel,1), ev:round(b.ev,1), xwoba:round(b.xwoba,3),
         hrPct:(b.hr!=null&&b.pa)?round(b.hr/b.pa*100,1):0, hrSeason:b.hr??0,
+        hr5:(r.hr5!=null?r.hr5:null), avg5:(r.avg5!=null?round(r.avg5,3):null),
         playingToday:true, venue:opp.venue||b.teamAbbr, game:opp.game||"",
         pitcher:opp.name||"TBD", pitcherHand:opp.hand||"R",
         pitcherHR9:opp.hr9!=null?round(opp.hr9,1):0
@@ -331,9 +341,27 @@ async function gatherInputs(date){
     }
   }
 
-  // 5) Best-effort last-10 + batter-vs-pitcher for the bats we'll likely show.
-  const l10ById={}, bvpById={};
-  // Pre-rank to limit extra calls to the ~top bats per team.
+  // 5) Recent form for EVERY qualified bat (last-5 + last-10) from game logs,
+  //    plus batter-vs-pitcher for the top bats only. Game logs are one call each,
+  //    run in a small concurrency pool so a 250+ roster stays quick and any single
+  //    failure just degrades that player's recent columns to "—".
+  const recentById={}, l10ById={}, bvpById={};
+  await mapPool(batters, 8, async b=>{
+    try{
+      const gj=await getJSON(`${MLB}/people/${b.id}/stats?stats=gameLog&group=hitting&season=${SEASON}`);
+      const splits=(gj.stats?.[0]?.splits)||[];               // chronological, oldest->newest
+      const lastN=n=>splits.slice(-n).map(s=>s.stat||{});
+      const agg=arr=>arr.reduce((o,s)=>({h:o.h+(+s.hits||0),ab:o.ab+(+s.atBats||0),hr:o.hr+(+s.homeRuns||0),g:o.g+1}),{h:0,ab:0,hr:0,g:0});
+      const a5=agg(lastN(5)), a10=agg(lastN(10));
+      recentById[b.id]={
+        hr5:a5.hr, avg5:a5.ab?a5.h/a5.ab:null, games5:a5.g,
+        hr10:a10.hr, avg10:a10.ab?a10.h/a10.ab:null, games10:a10.g
+      };
+      l10ById[b.id]={avg:recentById[b.id].avg10||0, hr:a10.hr, games:a10.g};
+    }catch(e){}
+  });
+
+  // Batter-vs-pitcher: only the top bats per team (keeps calls bounded).
   const pre={};
   for(const b of batters){ (pre[b.teamAbbr]=pre[b.teamAbbr]||[]).push(b); }
   const shortlist=[];
@@ -343,21 +371,15 @@ async function gatherInputs(date){
   }
   const oppId={};
   for(const g of games){ oppId[g.homeAbbr]=g.away.prob?.id; oppId[g.awayAbbr]=g.home.prob?.id; }
-  for(const b of shortlist){
-    try{
-      const lj=await getJSON(`${MLB}/people/${b.id}/stats?stats=lastXGames&group=hitting&limit=10&season=${SEASON}`);
-      const s=lj.stats?.[0]?.splits?.[0]?.stat||{};
-      l10ById[b.id]={avg:parseFloat(s.avg||"0"),hr:+(s.homeRuns||0),games:+(s.gamesPlayed||0)};
-    }catch(e){}
+  await mapPool(shortlist, 8, async b=>{
     const pid=oppId[b.teamAbbr];
-    if(pid){
-      try{
-        const vj=await getJSON(`${MLB}/people/${b.id}/stats?stats=vsPlayer&group=hitting&opposingPlayerId=${pid}&season=all`);
-        const s=(vj.stats?.find(x=>x.splits?.length)?.splits?.[0]?.stat)||{};
-        if(s.plateAppearances) bvpById[b.id]={pa:+s.plateAppearances,avg:parseFloat(s.avg||"0"),hr:+(s.homeRuns||0)};
-      }catch(e){}
-    }
-  }
+    if(!pid) return;
+    try{
+      const vj=await getJSON(`${MLB}/people/${b.id}/stats?stats=vsPlayer&group=hitting&opposingPlayerId=${pid}&season=all`);
+      const s=(vj.stats?.find(x=>x.splits?.length)?.splits?.[0]?.stat)||{};
+      if(s.plateAppearances) bvpById[b.id]={pa:+s.plateAppearances,avg:parseFloat(s.avg||"0"),hr:+(s.homeRuns||0)};
+    }catch(e){}
+  });
 
   // 6) Weather per home park.
   const weatherByPark={};
@@ -376,7 +398,7 @@ async function gatherInputs(date){
     }catch(e){ weatherByPark[k]={dome:false,temp:70,wind:6,windDeg:0,rain:0}; }
   }
 
-  return {date,games,batters,weatherByPark,l10ById,bvpById};
+  return {date,games,batters,weatherByPark,l10ById,bvpById,recentById};
 }
 
 async function getArsenal(pitcherId){
