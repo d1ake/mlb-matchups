@@ -39,6 +39,8 @@ function valScore(p){return p.fdOdds?(p.prob/100)/vigImp(p.fdOdds):0}
 
 let expanded=null,activeTab={},currentFilter='games',scored=[];
 let rosterSortKey='rating',rosterSortDir=-1;   // full-slate table sort state
+let rosterView='game';                          // 'game' | 'team' | 'flat'
+function setRosterView(v){ rosterView=v; renderRoster(); }
 
 /* ══ PARK GRID ══ */
 function renderParks(){
@@ -318,20 +320,12 @@ function renderRoster(){
     return;
   }
   const rows=ROSTER.map(p=>({...p,rating:score(p)}));
-  const k=rosterSortKey,dir=rosterSortDir;
-  rows.sort((a,b)=>{
-    let x=a[k],y=b[k];
-    if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
-    return ((x??0)-(y??0))*dir;
-  });
-  const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
-  const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
-  const head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
-  const body=rows.map(p=>{
-    const c=probColor(p.rating);
-    const hot5=p.hr5!=null&&p.hr5>=2;
-    return`<tr>
-      <td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
+  const COLN=10;
+
+  // one row's cells — identical in every view
+  const cells=p=>{
+    const c=probColor(p.rating), hot5=p.hr5!=null&&p.hr5>=2;
+    return `<td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
       <td class="slate-name">${p.name}</td>
       <td>${p.team}</td>
       <td class="slate-match">${p.game||'—'}${p.pitcher&&p.pitcher!=='TBD'?` · vs ${p.pitcher}`:''}</td>
@@ -340,14 +334,53 @@ function renderRoster(){
       <td class="num">${p.xwoba!=null?'.'+Math.round(p.xwoba*1000):'—'}</td>
       <td class="num">${p.hrSeason??0}</td>
       <td class="num"${hot5?' style="color:var(--gold2)"':''}>${p.hr5!=null?p.hr5:'—'}</td>
-      <td class="num">${p.avg5!=null?'.'+String(Math.round(p.avg5*1000)).padStart(3,'0'):'—'}</td>
-    </tr>`;
-  }).join('');
-  wrap.innerHTML=`<div class="slate-count">${rows.length} qualified hitters</div>
-    <div class="slate-scroll"><table class="slate-table">
-      <thead><tr>${head}</tr></thead><tbody>${body}</tbody>
-    </table></div>`;
+      <td class="num">${p.avg5!=null?'.'+String(Math.round(p.avg5*1000)).padStart(3,'0'):'—'}</td>`;
+  };
+
+  const toggle=`<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <button class="ctrl-btn${rosterView==='game'?' active':''}" onclick="setRosterView('game')">BY MATCHUP</button>
+    <button class="ctrl-btn${rosterView==='team'?' active':''}" onclick="setRosterView('team')">BY TEAM</button>
+    <button class="ctrl-btn${rosterView==='flat'?' active':''}" onclick="setRosterView('flat')">SORTABLE</button>
+  </div>`;
+  const grpStyle="background:var(--surface2);color:var(--gold2);font-family:var(--font-disp);font-size:15px;letter-spacing:.04em;padding:9px 10px;border-top:1px solid var(--border2)";
+
+  let head, body;
+  if(rosterView==='flat'){
+    const k=rosterSortKey,dir=rosterSortDir;
+    rows.sort((a,b)=>{let x=a[k],y=b[k];
+      if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
+      return ((x??0)-(y??0))*dir;});
+    const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
+    const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
+    head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
+    body=rows.map(p=>`<tr>${cells(p)}</tr>`).join('');
+  }else{
+    // grouped by game (matchup) or by team; each group sorted by rating desc
+    const key=rosterView==='team'?'team':'game';
+    const groups={};
+    rows.forEach(p=>{(groups[p[key]]=groups[p[key]]||[]).push(p);});
+    const ordered=Object.keys(groups).sort((a,b)=>
+      Math.max(...groups[b].map(p=>p.rating))-Math.max(...groups[a].map(p=>p.rating)));
+    const label=g=> rosterView==='team' ? teamName(g) : matchupLabel(g);
+    body=ordered.map(g=>{
+      const list=groups[g].sort((a,b)=>b.rating-a.rating);
+      return `<tr><td colspan="${COLN}" style="${grpStyle}">${label(g)} · ${list.length}</td></tr>`
+        + list.map(p=>`<tr>${cells(p)}</tr>`).join('');
+    }).join('');
+    const cols=['Rating','Player','Tm','Matchup','Bar%','EV','xwOBA','HR','HR L5','AVG L5'];
+    const numset=new Set(['Rating','Bar%','EV','xwOBA','HR','HR L5','AVG L5']);
+    head=cols.map(c=>`<th class="${numset.has(c)?'num':''}" style="cursor:default">${c}</th>`).join('');
+  }
+
+  wrap.innerHTML=toggle
+    +`<div class="slate-count">${rows.length} qualified hitters${rosterView==='flat'?' · click a column to sort':' · sorted by rating within each group'}</div>`
+    +`<div class="slate-scroll"><table class="slate-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
+
+// abbr -> nickname, for readable group headers
+const TEAM_NAME={ARI:'Diamondbacks',ATL:'Braves',BAL:'Orioles',BOS:'Red Sox',CHC:'Cubs',CWS:'White Sox',CIN:'Reds',CLE:'Guardians',COL:'Rockies',DET:'Tigers',HOU:'Astros',KC:'Royals',LAA:'Angels',LAD:'Dodgers',MIA:'Marlins',MIL:'Brewers',MIN:'Twins',NYM:'Mets',NYY:'Yankees',PHI:'Phillies',PIT:'Pirates',SD:'Padres',SF:'Giants',SEA:'Mariners',STL:'Cardinals',TB:'Rays',TEX:'Rangers',TOR:'Blue Jays',WSH:'Nationals',ATH:'Athletics'};
+const teamName=a=>TEAM_NAME[a]||a;
+function matchupLabel(game){const[a,h]=String(game).split('@');return h?`${teamName(a)} @ ${teamName(h)}`:teamName(a);}
 
 /* ══ INIT ══ */
 function fmtDate(s){const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const dy=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const dt=new Date(y,m-1,d);return`${dy[dt.getDay()]}, ${mo[m-1]} ${parseInt(d)}, ${y}`}
