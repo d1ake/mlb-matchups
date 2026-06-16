@@ -2600,7 +2600,7 @@
 {"date":"2026-06-16","id":642708,"name":"Amed Rosario","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"R","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
 {"date":"2026-06-16","id":641857,"name":"Ryan McMahon","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"L","pitcherHand":"R","rating":29,"modelProb":0.29,"actualHR":null}
 {"date":"2026-06-16","id":665862,"name":"Jazz Chisholm Jr.","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"L","pitcherHand":"R","rating":27,"modelProb":0.27,"actualHR":null}
-{"date":"2026-06-16","id":641355,"name":"Cody Bellinger","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"L","pitcherHand":"R","rating":29,"modelProb":0.29,"actualHR":null}
+{"date":"2026-06-16","id":641355,"name":"Cody Bellinger","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
 {"date":"2026-06-16","id":683011,"name":"Anthony Volpe","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"R","pitcherHand":"R","rating":14,"modelProb":0.14,"actualHR":null}
 {"date":"2026-06-16","id":641555,"name":"J.C. Escarra","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"L","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
 {"date":"2026-06-16","id":676609,"name":"José Caballero","team":"NYY","venue":"NYY","game":"CWS@NYY","pitcher":"Davis Martin","hand":"R","pitcherHand":"R","rating":13,"modelProb":0.13,"actualHR":null}
@@ -2673,7 +2673,6 @@
 {"date":"2026-06-16","id":686217,"name":"Sal Frelick","team":"MIL","venue":"MIL","game":"CLE@MIL","pitcher":"Slade Cecconi","hand":"L","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
 {"date":"2026-06-16","id":700932,"name":"Kyle Manzardo","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":29,"modelProb":0.29,"actualHR":null}
 {"date":"2026-06-16","id":656555,"name":"Rhys Hoskins","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":31,"modelProb":0.31,"actualHR":null}
-{"date":"2026-06-16","id":682657,"name":"Angel Martínez","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"S","pitcherHand":"L","rating":28,"modelProb":0.28,"actualHR":null}
 {"date":"2026-06-16","id":672275,"name":"Patrick Bailey","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"S","pitcherHand":"L","rating":25,"modelProb":0.25,"actualHR":null}
 {"date":"2026-06-16","id":681807,"name":"David Fry","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":26,"modelProb":0.26,"actualHR":null}
 {"date":"2026-06-16","id":682177,"name":"Daniel Schneemann","team":"CLE","venue":"MIL","game":"CLE@MIL","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":23,"modelProb":0.23,"actualHR":null}
@@ -2752,6 +2751,7 @@
 {"date":"2026-06-16","id":665161,"name":"Jeremy Peña","team":"HOU","venue":"HOU","game":"DET@HOU","pitcher":"Framber Valdez","hand":"R","pitcherHand":"L","rating":21,"modelProb":0.21,"actualHR":null}
 {"date":"2026-06-16","id":666211,"name":"Taylor Trammell","team":"HOU","venue":"HOU","game":"DET@HOU","pitcher":"Framber Valdez","hand":"L","pitcherHand":"L","rating":14,"modelProb":0.14,"actualHR":null}
 {"date":"2026-06-16","id":694388,"name":"Joey Loperfido","team":"HOU","venue":"HOU","game":"DET@HOU","pitcher":"Framber Valdez","hand":"L","pitcherHand":"L","rating":16,"modelProb":0.16,"actualHR":null}
+{"date":"2026-06-16","id":673237,"name":"Yainer Diaz","team":"HOU","venue":"HOU","game":"DET@HOU","pitcher":"Framber Valdez","hand":"R","pitcherHand":"L","rating":19,"modelProb":0.19,"actualHR":null}
 {"date":"2026-06-16","id":543877,"name":"Christian Vázquez","team":"HOU","venue":"HOU","game":"DET@HOU","pitcher":"Framber Valdez","hand":"R","pitcherHand":"L","rating":16,"modelProb":0.16,"actualHR":null}
 {"date":"2026-06-16","id":679529,"name":"Spencer Torkelson","team":"DET","venue":"HOU","game":"DET@HOU","pitcher":"Hunter Brown","hand":"R","pitcherHand":"R","rating":30,"modelProb":0.3,"actualHR":null}
 {"date":"2026-06-16","id":682985,"name":"Riley Greene","team":"DET","venue":"HOU","game":"DET@HOU","pitcher":"Hunter Brown","hand":"L","pitcherHand":"R","rating":33,"modelProb":0.33,"actualHR":null}
@@ -2798,7 +2798,7 @@
 {"date":"2026-06-16","id":703607,"name":"Henry Bolte","team":"ATH","venue":"ATH","game":"PIT@ATH","pitcher":"Mitch Keller","hand":"R","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
 {"date":"2026-06-16","id":805779,"name":"Jacob Wilson","team":"ATH","venue":"ATH","game":"PIT@ATH","pitcher":"Mitch Keller","hand":"R","pitcherHand":"R","rating":12,"modelProb":0.12,"actualHR":null}
 {"date":"2026-06-16","id":643446,"name":"Jeff McNeil","team":"ATH","venue":"ATH","game":"PIT@ATH","pitcher":"Mitch Keller","hand":"L","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
-{"date":"2026-06-16","id":682848,"name":"Endy Rodríguez","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"S","pitcherHand":"R","rating":36,"modelProb":0.36,"actualHR":null}
+{"date":"2026-06-16","id":682848,"name":"Endy Rodríguez","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"S","pitcherHand":"R","rating":35,"modelProb":0.35,"actualHR":null}
 {"date":"2026-06-16","id":664040,"name":"Brandon Lowe","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"L","pitcherHand":"R","rating":34,"modelProb":0.34,"actualHR":null}
 {"date":"2026-06-16","id":680779,"name":"Henry Davis","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"R","pitcherHand":"R","rating":26,"modelProb":0.26,"actualHR":null}
 {"date":"2026-06-16","id":668804,"name":"Bryan Reynolds","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"S","pitcherHand":"R","rating":29,"modelProb":0.29,"actualHR":null}
@@ -2810,6 +2810,8 @@
 {"date":"2026-06-16","id":663968,"name":"Jake Mangum","team":"PIT","venue":"ATH","game":"PIT@ATH","pitcher":"Jack Perkins","hand":"S","pitcherHand":"R","rating":13,"modelProb":0.13,"actualHR":null}
 {"date":"2026-06-16","id":670042,"name":"Luke Raley","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":37,"modelProb":0.37,"actualHR":null}
 {"date":"2026-06-16","id":686527,"name":"Dominic Canzone","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":38,"modelProb":0.38,"actualHR":null}
+{"date":"2026-06-16","id":663728,"name":"Cal Raleigh","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"S","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-06-16","id":641487,"name":"J.P. Crawford","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
 {"date":"2026-06-16","id":677594,"name":"Julio Rodríguez","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
 {"date":"2026-06-16","id":608701,"name":"Rob Refsnyder","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"R","pitcherHand":"R","rating":17,"modelProb":0.17,"actualHR":null}
 {"date":"2026-06-16","id":668227,"name":"Randy Arozarena","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"R","pitcherHand":"R","rating":23,"modelProb":0.23,"actualHR":null}
@@ -2817,7 +2819,6 @@
 {"date":"2026-06-16","id":806068,"name":"Colt Emerson","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
 {"date":"2026-06-16","id":702284,"name":"Cole Young","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
 {"date":"2026-06-16","id":647304,"name":"Josh Naylor","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"L","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
-{"date":"2026-06-16","id":640902,"name":"Jhonny Pereda","team":"SEA","venue":"SEA","game":"BAL@SEA","pitcher":"Brandon Young","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
 {"date":"2026-06-16","id":702616,"name":"Jackson Holliday","team":"BAL","venue":"SEA","game":"BAL@SEA","pitcher":"Logan Gilbert","hand":"L","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
 {"date":"2026-06-16","id":694212,"name":"Samuel Basallo","team":"BAL","venue":"SEA","game":"BAL@SEA","pitcher":"Logan Gilbert","hand":"L","pitcherHand":"R","rating":34,"modelProb":0.34,"actualHR":null}
 {"date":"2026-06-16","id":681297,"name":"Colton Cowser","team":"BAL","venue":"SEA","game":"BAL@SEA","pitcher":"Logan Gilbert","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
@@ -2839,7 +2840,6 @@
 {"date":"2026-06-16","id":690976,"name":"Alex Freeland","team":"LAD","venue":"LAD","game":"TB@LAD","pitcher":"Drew Rasmussen","hand":"S","pitcherHand":"R","rating":23,"modelProb":0.23,"actualHR":null}
 {"date":"2026-06-16","id":500743,"name":"Miguel Rojas","team":"LAD","venue":"LAD","game":"TB@LAD","pitcher":"Drew Rasmussen","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
 {"date":"2026-06-16","id":663656,"name":"Kyle Tucker","team":"LAD","venue":"LAD","game":"TB@LAD","pitcher":"Drew Rasmussen","hand":"L","pitcherHand":"R","rating":25,"modelProb":0.25,"actualHR":null}
-{"date":"2026-06-16","id":669289,"name":"Santiago Espinal","team":"LAD","venue":"LAD","game":"TB@LAD","pitcher":"Drew Rasmussen","hand":"R","pitcherHand":"R","rating":15,"modelProb":0.15,"actualHR":null}
 {"date":"2026-06-16","id":669743,"name":"Alex Call","team":"LAD","venue":"LAD","game":"TB@LAD","pitcher":"Drew Rasmussen","hand":"R","pitcherHand":"R","rating":11,"modelProb":0.11,"actualHR":null}
 {"date":"2026-06-16","id":691406,"name":"Junior Caminero","team":"TB","venue":"LAD","game":"TB@LAD","pitcher":"Justin Wrobleski","hand":"R","pitcherHand":"L","rating":36,"modelProb":0.36,"actualHR":null}
 {"date":"2026-06-16","id":666018,"name":"Jonathan Aranda","team":"TB","venue":"LAD","game":"TB@LAD","pitcher":"Justin Wrobleski","hand":"L","pitcherHand":"L","rating":29,"modelProb":0.29,"actualHR":null}
