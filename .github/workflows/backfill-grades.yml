@@ -1,0 +1,36 @@
+name: Backfill grades
+
+# One-button grader. Run it from the Actions tab (Run workflow). It reads
+# eval/predictions.jsonl, fetches real box scores for every ungraded past date,
+# fills in actualHR (1 homered / 0 played-no-HR / null didn't appear), and commits.
+# Safe to run repeatedly — it only touches still-ungraded rows.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Grade predictions
+        run: node eval/grade.js
+
+      - name: Commit graded log
+        run: |
+          git config user.name  "barreliq-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add eval/predictions.jsonl
+          if git diff --cached --quiet; then
+            echo "No new grades to commit."
+          else
+            git commit -m "grade: backfill outcomes $(date -u +%Y-%m-%d)"
+            git push
+          fi
