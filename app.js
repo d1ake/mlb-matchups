@@ -494,6 +494,71 @@ function initApp(){
   window.initAppRan=true;
 }
 
+/* ══ POST MODE (screenshot-ready Top 10) ══ */
+// Probability (0-1) -> fair American odds (no vig). This is the model's number
+// restated as odds, NOT a market price — labeled "fair" so it can't read as edge.
+function probToFairOdds(p){
+  if(p<=0) return '+9999'; if(p>=1) return '-9999';
+  return p>=0.5 ? '-'+Math.round(100*p/(1-p)) : '+'+Math.round(100*(1-p)/p);
+}
+function closePostMode(){ const o=document.getElementById('post-overlay'); if(o) o.remove(); }
+function openPostMode(){
+  closePostMode();
+  const top = scored.filter(p=>p.playingToday).slice(0,10);
+  const chip = (txt,col)=>`<span style="font-family:var(--font-mono);font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--border2);color:${col||'var(--muted)'};white-space:nowrap">${txt}</span>`;
+  const rows = top.map((p,i)=>{
+    const prob=calibrate(p.prob), pct=Math.round(prob*100)+'%', fair=probToFairOdds(prob);
+    const col=probColor(p.prob), adj=adjPF(p.venue), wx=WX[p.venue];
+    const gP=(p.hand==='L'&&p.pitcherHand==='R')||(p.hand==='R'&&p.pitcherHand==='L');
+    const chips=[
+      chip('PF '+adj, adj>=108?'var(--gold)':adj<95?'var(--purple)':'var(--muted)'),
+      (wx&&wx.tag)?chip(wx.tag, wx.impact==='boost'?'var(--orange)':wx.impact==='suppress'?'var(--purple)':'var(--muted)'):'',
+      gP?chip('✓ PLATOON','var(--green)'):''
+    ].filter(Boolean).join('');
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--border)">
+      <div style="font-family:var(--font-disp);font-size:24px;line-height:1;color:${i<3?'var(--gold2)':'var(--dim)'};width:26px;text-align:center">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--font-disp);font-size:19px;letter-spacing:.03em;color:var(--text);line-height:1.1">${p.name}</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin:3px 0 5px">${p.team} · ${p.game} · vs ${p.pitcher}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${chips}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--font-disp);font-size:30px;line-height:1;color:${col}">${pct}</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:1px">HR PROB</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--dim);margin-top:3px">${fair} fair</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const o=document.createElement('div');
+  o.id='post-overlay';
+  o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);overflow:auto;padding:24px 12px;display:flex;justify-content:center;align-items:flex-start';
+  o.innerHTML=`<div style="position:relative;width:100%;max-width:440px">
+    <button onclick="closePostMode()" style="position:absolute;top:-10px;right:-2px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:20px;font-family:var(--font-mono);font-size:11px;padding:4px 12px;cursor:pointer;z-index:2">✕ CLOSE</button>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">📸 screenshot the card below</div>
+    <div id="post-card" style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-lg);overflow:hidden">
+      <div style="padding:16px 14px 12px;background:linear-gradient(135deg,rgba(232,163,32,.12),transparent)">
+        <div style="font-family:var(--font-disp);font-size:30px;letter-spacing:.02em;background:linear-gradient(135deg,var(--gold2),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">D1AKE DINGERS</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px">Top 10 HR Projections · ${fmtDate(SLATE_DATE)}</div>
+      </div>
+      ${rows}
+      <div style="padding:11px 14px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:9px;line-height:1.5;color:var(--dim)">
+        HR PROB = model-calibrated home-run probability (fit on 5,400+ graded games). "Fair" odds restate that probability — they are NOT a sportsbook price and no edge over the market is claimed. For entertainment only, not betting advice. If gambling is a problem, call 1-800-GAMBLER.
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+}
+function injectPostButton(){
+  if(document.getElementById('post-mode-btn')) return;
+  const b=document.createElement('button');
+  b.id='post-mode-btn'; b.textContent='📸 POST';
+  b.onclick=openPostMode;
+  b.style.cssText='position:fixed;bottom:18px;right:18px;z-index:500;background:var(--gold);color:var(--bg);border:none;border-radius:24px;font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:.04em;padding:10px 16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+  document.body.appendChild(b);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.initAppRan) initApp();
+  injectPostButton();
 });
