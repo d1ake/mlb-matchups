@@ -24,12 +24,14 @@ function score(p){
   if(p.bvp?.hr>0) base=Math.min(97,base+1);
   return base;
 }
-// Tier bands for the 0-100 Rating. Calibrated to the rating's realistic active-hitter
-// range (~30-65), NOT absolute 0-100 quartiles, so the slate spreads across tiers:
-// >=52 elite · 44-51 strong · 36-43 solid · <36 watch.
-// Colors MUST mirror the .tier-* border colors in styles.css so every tier indicator
-// (number, bar fill, card border) shows one color per tier:
-// elite=--gold #e8a320 · strong=--green #22c97a · solid=--blue #4a9eff · watch=--dim #4a5260
+
+// ── CALIBRATION ───────────────────────────────────────────────────────
+// Turns the 0-100 rating into a REAL home-run probability.
+// Fit from 5,484 graded player-games (Jun 2026):  p = 0.0057*rating - 0.022
+// Verified vs observed rates: r25->12%, r35->18%, r45->24%.
+function calibrate(rating){ return Math.max(0.01, Math.min(0.60, 0.0057*rating - 0.022)); }
+function calibPct(rating){ return Math.round(calibrate(rating)*100)+'%'; }
+
 function probColor(p){return p>=52?'#e8a320':p>=44?'#22c97a':p>=36?'#4a9eff':'#4a5260'}
 function tierClass(p){return p>=52?'tier-elite':p>=44?'tier-strong':p>=36?'tier-solid':'tier-watch'}
 function toDecimal(am){return am>0?am/100+1:100/Math.abs(am)+1}
@@ -44,8 +46,6 @@ function setRosterView(v){ rosterView=v; renderRoster(); }
 
 /* ══ PARK GRID ══ */
 function renderParks(){
-  // Today's slate = home venues hosting a game (keyed by WX, the per-day data set).
-  // Derived from data so the UI can never drift from the dataset (e.g. listing an away team).
   const today=Object.keys(WX);
   const sorted=Object.entries(PF).sort((a,b)=>b[1].f-a[1].f);
   const list=[...sorted.filter(([k])=>today.includes(k)),...sorted.filter(([k])=>!today.includes(k))];
@@ -161,14 +161,11 @@ function renderPlayers(){
         <div class="note-box"><div class="nb-label">Bullpen — ${p.bullpen.team}</div>${p.bullpen.note}</div>`;
       }
       if(tab==='pitchmix'){
-        // Usage bars
         const bars=p.pitchMix.map(pm=>`<div class="pitch-row">
           <span class="pitch-name">${pm.n}</span>
           <div class="pitch-bar-bg"><div class="pitch-bar-fill" style="width:${pm.p}%;background:${pm.c}"></div></div>
           <span class="pitch-pct">${pm.p}%</span>
         </div>`).join('');
-
-        // Per-pitch batter split table
         const tableRows=p.pitchSplits.map(s=>{
           const isTarget=s.target,isAvoid=s.avoid;
           const rowClass=isTarget?'target-row':'';
@@ -183,7 +180,6 @@ function renderPlayers(){
             <td class="${hrClass(s.hrRate)}">${s.hrRate}%</td>
           </tr>`;
         }).join('');
-
         pane=`<div class="note-box" style="margin-bottom:8px"><div class="nb-label">Pitcher Arsenal — ${p.pitcher}</div>
           <div class="pitch-mix">${bars}</div>
         </div>
@@ -193,12 +189,7 @@ function renderPlayers(){
             <table class="pvb-table">
               <thead><tr>
                 <th style="text-align:left">Pitch</th>
-                <th>AVG</th>
-                <th>HH%</th>
-                <th>BBL%</th>
-                <th>EV</th>
-                <th>wOBA</th>
-                <th>HR%</th>
+                <th>AVG</th><th>HH%</th><th>BBL%</th><th>EV</th><th>wOBA</th><th>HR%</th>
               </tr></thead>
               <tbody>${tableRows}</tbody>
             </table>
@@ -259,9 +250,9 @@ function renderPlayers(){
           </div>
         </div>
         <div class="prob-block">
-          <div class="prob-pct" style="color:${barColor}">${p.prob}</div>
-          <div class="prob-lbl">RATING /100</div>
-          ${p.fdOdds?`<div class="mkt-implied">Mkt +${p.fdOdds} · ${Math.round(vigImp(p.fdOdds)*100)}% impl.</div>`:''}
+          <div class="prob-pct" style="color:${barColor}">${calibPct(p.prob)}</div>
+          <div class="prob-lbl">HR PROBABILITY</div>
+          <div class="mkt-implied">Rating ${p.prob}/100</div>
         </div>
       </div>
       <div class="prob-bar-row"><div class="prob-bar-fill" style="width:${bw}%;background:${barColor}"></div></div>
@@ -319,13 +310,14 @@ function renderRoster(){
     wrap.innerHTML='<div class="loading-state"><div class="loading-label" style="color:var(--muted)">Full slate appears after the next daily build.</div></div>';
     return;
   }
-  const rows=ROSTER.map(p=>({...p,rating:score(p)}));
-  const COLN=10;
+  const rows=ROSTER.map(p=>{const r=score(p);return {...p,rating:r,cal:calibrate(r)};});
+  const COLN=11;
 
-  // one row's cells — identical in every view
+  // one row's cells — identical in every view (Rating, HR%, then the rest)
   const cells=p=>{
     const c=probColor(p.rating), hot5=p.hr5!=null&&p.hr5>=2;
     return `<td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
+      <td class="num" style="font-family:var(--font-mono);color:var(--gold2)">${calibPct(p.rating)}</td>
       <td class="slate-name">${p.name}</td>
       <td>${p.team}</td>
       <td class="slate-match">${p.game||'—'}${p.pitcher&&p.pitcher!=='TBD'?` · vs ${p.pitcher}`:''}</td>
@@ -350,12 +342,11 @@ function renderRoster(){
     rows.sort((a,b)=>{let x=a[k],y=b[k];
       if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
       return ((x??0)-(y??0))*dir;});
-    const cols=[['rating','Rating'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
+    const cols=[['rating','Rating'],['cal','HR%'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
     const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
-    head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
+    head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','cal','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
     body=rows.map(p=>`<tr>${cells(p)}</tr>`).join('');
   }else{
-    // grouped by game (matchup) or by team; each group sorted by rating desc
     const key=rosterView==='team'?'team':'game';
     const groups={};
     rows.forEach(p=>{(groups[p[key]]=groups[p[key]]||[]).push(p);});
@@ -367,13 +358,13 @@ function renderRoster(){
       return `<tr><td colspan="${COLN}" style="${grpStyle}">${label(g)} · ${list.length}</td></tr>`
         + list.map(p=>`<tr>${cells(p)}</tr>`).join('');
     }).join('');
-    const cols=['Rating','Player','Tm','Matchup','Bar%','EV','xwOBA','HR','HR L5','AVG L5'];
-    const numset=new Set(['Rating','Bar%','EV','xwOBA','HR','HR L5','AVG L5']);
+    const cols=['Rating','HR%','Player','Tm','Matchup','Bar%','EV','xwOBA','HR','HR L5','AVG L5'];
+    const numset=new Set(['Rating','HR%','Bar%','EV','xwOBA','HR','HR L5','AVG L5']);
     head=cols.map(c=>`<th class="${numset.has(c)?'num':''}" style="cursor:default">${c}</th>`).join('');
   }
 
   wrap.innerHTML=toggle
-    +`<div class="slate-count">${rows.length} qualified hitters${rosterView==='flat'?' · click a column to sort':' · sorted by rating within each group'}</div>`
+    +`<div class="slate-count">${rows.length} qualified hitters · HR% = calibrated probability${rosterView==='flat'?' · click a column to sort':' · sorted by rating within each group'}</div>`
     +`<div class="slate-scroll"><table class="slate-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
@@ -384,12 +375,7 @@ function matchupLabel(game){const[a,h]=String(game).split('@');return h?`${teamN
 
 /* ══ INIT ══ */
 function fmtDate(s){const[y,m,d]=s.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const dy=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const dt=new Date(y,m-1,d);return`${dy[dt.getDay()]}, ${mo[m-1]} ${parseInt(d)}, ${y}`}
-
-// Local date as YYYY-MM-DD (matches DATA_DATE format and how MLB keys schedules).
 function localISODate(){const d=new Date();const p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
-
-// Full-name -> YOUR abbreviation convention (matches PF/WX/PLAYERS keys: ARI, ATH, CWS, WSH...).
-// We prefer this over the API's own abbreviation field, which uses different codes (AZ, OAK).
 const TEAM_MAP={
   "Arizona Diamondbacks":"ARI","Atlanta Braves":"ATL","Baltimore Orioles":"BAL","Boston Red Sox":"BOS",
   "Chicago Cubs":"CHC","Chicago White Sox":"CWS","Cincinnati Reds":"CIN","Cleveland Guardians":"CLE",
@@ -398,22 +384,17 @@ const TEAM_MAP={
   "Minnesota Twins":"MIN","New York Mets":"NYM","New York Yankees":"NYY","Philadelphia Phillies":"PHI",
   "Pittsburgh Pirates":"PIT","San Diego Padres":"SD","San Francisco Giants":"SF","Seattle Mariners":"SEA",
   "St. Louis Cardinals":"STL","Tampa Bay Rays":"TB","Texas Rangers":"TEX","Toronto Blue Jays":"TOR",
-  "Washington Nationals":"WSH",
-  "Athletics":"ATH","Oakland Athletics":"ATH","Sacramento Athletics":"ATH"
+  "Washington Nationals":"WSH","Athletics":"ATH","Oakland Athletics":"ATH","Sacramento Athletics":"ATH"
 };
 function resolveAbbr(team){
   if(!team) return '';
   const raw=TEAM_MAP[(team.name||'').trim()] || team.abbreviation || team.name || '';
   return String(raw).trim().toUpperCase();
 }
-
-/* ══ LIVE SCHEDULE LAYER (best-effort; never blocks rendering) ══ */
-// Today's real MLB slate, fetched client-side. Returns {teams:Set, gameCount}.
-// Throws on network/HTTP failure so the caller can fall back to the curated snapshot.
 async function fetchTodaySlate(dateStr){
   const url=`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}`;
   const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),8000); // never hang on a stalled request
+  const timer=setTimeout(()=>ctrl.abort(),8000);
   let data;
   try{
     const res=await fetch(url,{signal:ctrl.signal});
@@ -431,20 +412,15 @@ async function fetchTodaySlate(dateStr){
 }
 
 /* ══ SLATE STATE ══ */
-let TODAY_TEAMS=null;     // Set of today's live teams, or null when using the curated snapshot
-let SLATE_DATE=DATA_DATE; // date shown in the header
-let LIVE_GAMES=null;      // today's live game count
-let SELECTED_DATE=null;   // date chosen in the picker; null = use today's real date
-
-// The date we actually fetch: the picked date if set, otherwise today.
+let TODAY_TEAMS=null;
+let SLATE_DATE=DATA_DATE;
+let LIVE_GAMES=null;
+let SELECTED_DATE=null;
 function targetDate(){ return SELECTED_DATE || localISODate(); }
 
-// Build `scored` from the curated PLAYERS. Ratings ALWAYS use your curated data
-// (score reads the curated fields); only the playingToday flag is overlaid from
-// the live slate so "ACTIVE TODAY" reflects who's really playing today.
 function buildScored(){
   scored = PLAYERS.map(p=>{
-    const prob = score(p);                                   // curated rating, untouched
+    const prob = score(p);
     const active = TODAY_TEAMS ? TODAY_TEAMS.has(p.team) : p.playingToday;
     return { ...p, prob, playingToday: active };
   }).sort((a,b)=>b.prob-a.prob);
@@ -481,24 +457,20 @@ async function refreshLiveSlate(explicit=false){
   const date = targetDate();
   try{
     const slate = await fetchTodaySlate(date);
-    // On a normal auto-load, an off-day (no games) falls back to the curated demo.
-    // When the user explicitly picks a date, always show that date's real result.
     if(!slate.teams.size && !explicit) return;
-    TODAY_TEAMS = slate.teams;   // may be an empty Set for a picked off-day
+    TODAY_TEAMS = slate.teams;
     SLATE_DATE  = date;
     LIVE_GAMES  = slate.gameCount;
-    paint();                     // re-render with the chosen day's real slate
+    paint();
   }catch(e){
     console.warn('Live MLB schedule unavailable — showing curated snapshot.', e);
     if(explicit){
       const st=document.getElementById('status-text');
       if(st) st.textContent = `Couldn't load the schedule for ${fmtDate(date)} — showing curated snapshot.`;
     }
-    // Baseline is already on screen; nothing else to do. App never hangs.
   }
 }
 
-// Called when the date picker changes. Empty value clears the override (back to today).
 function onDatePick(value){
   SELECTED_DATE = value || null;
   const st=document.getElementById('status-text'), dot=document.getElementById('sdot');
@@ -508,20 +480,16 @@ function onDatePick(value){
 }
 
 function initApp(){
-  // Guard: if data.js didn't load, fail visibly instead of spinning forever.
   if (typeof PLAYERS === 'undefined' || typeof WX === 'undefined') {
     const s=document.getElementById('status-text'), d=document.getElementById('sdot');
     if(s) s.textContent='Error: data.js failed to load.';
     if(d) d.className='status-dot';
     return;
   }
-  // Reset transient view state, but KEEP any date the user picked so REFRESH re-fetches it.
   expanded=null; activeTab={}; currentFilter='games';
   TODAY_TEAMS=null; SLATE_DATE=DATA_DATE; LIVE_GAMES=null;
   paint();
-  // Sync the picker to the active target date (today, or the previously picked date).
   const dp=document.getElementById('date-picker'); if(dp) dp.value=targetDate();
-  // Then overlay the real slate, best-effort. Failure leaves the snapshot intact.
   refreshLiveSlate(SELECTED_DATE!==null);
   window.initAppRan=true;
 }
