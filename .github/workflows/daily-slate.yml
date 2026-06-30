@@ -1,7 +1,7 @@
 name: Daily slate
 
-# Rebuilds data.js with today's stats AND snapshots today's predictions for
-# later grading. Cron is UTC; 13:00 UTC ~= 9:00 AM ET. Adjust as needed.
+# Each run: grade yesterday's predictions (games now final), rebuild today's
+# data.js, record today's predictions. Cron is UTC; 13:00 UTC ~= 9:00 AM ET.
 on:
   schedule:
     - cron: '0 13 * * *'
@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Grade yesterday's predictions
+        run: node eval/grade.js
+
       - name: Build today's data.js
         run: node build-slate.js
 
@@ -34,6 +37,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing to commit."
           else
-            git commit -m "slate + predictions $(date -u +%Y-%m-%d)"
+            git commit -m "slate + predictions + grades $(date -u +%Y-%m-%d)"
             git push
           fi
