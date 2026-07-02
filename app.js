@@ -40,7 +40,7 @@ function vigImp(am){return am>0?100/(am+100):Math.abs(am)/(Math.abs(am)+100)}
 function valScore(p){return p.fdOdds?(p.prob/100)/vigImp(p.fdOdds):0}
 
 let expanded=null,activeTab={},currentFilter='games',scored=[];
-let rosterSortKey='rating',rosterSortDir=-1;   // full-slate table sort state
+let rosterSortKey='cal',rosterSortDir=-1;   // full-slate table sort state
 let rosterView='game';                          // 'game' | 'team' | 'flat'
 function setRosterView(v){ rosterView=v; renderRoster(); }
 
@@ -310,14 +310,14 @@ function renderRoster(){
     wrap.innerHTML='<div class="loading-state"><div class="loading-label" style="color:var(--muted)">Full slate appears after the next daily build.</div></div>';
     return;
   }
-  const rows=ROSTER.map(p=>{const r=score(p);return {...p,rating:r,cal:calibrate(r)};});
+  const rows=ROSTER.map(p=>{const r=score(p);const cp=calibrate(r);return {...p,rating:r,cal:cp,fo:cp};});
   const COLN=11;
 
   // one row's cells — identical in every view (Rating, HR%, then the rest)
   const cells=p=>{
     const c=probColor(p.rating), hot5=p.hr5!=null&&p.hr5>=2;
-    return `<td class="num"><span class="slate-rating" style="color:${c}">${p.rating}</span></td>
-      <td class="num" style="font-family:var(--font-mono);color:var(--gold2)">${calibPct(p.rating)}</td>
+    return `<td class="num" style="font-family:var(--font-mono);color:var(--gold2)">${calibPct(p.rating)}</td>
+      <td class="num" style="font-family:var(--font-mono);color:${c}">${probToFairOdds(p.cal)}</td>
       <td class="slate-name">${p.name}</td>
       <td>${p.team}</td>
       <td class="slate-match">${p.game||'—'}${p.pitcher&&p.pitcher!=='TBD'?` · vs ${p.pitcher}`:''}</td>
@@ -342,9 +342,9 @@ function renderRoster(){
     rows.sort((a,b)=>{let x=a[k],y=b[k];
       if(typeof x==='string'){x=x.toLowerCase();y=(y||'').toLowerCase();return x<y?-dir:x>y?dir:0;}
       return ((x??0)-(y??0))*dir;});
-    const cols=[['rating','Rating'],['cal','HR%'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
+    const cols=[['cal','HR%'],['fo','Fair Odds'],['name','Player'],['team','Tm'],['matchup','Matchup'],['barrel','Bar%'],['ev','EV'],['xwoba','xwOBA'],['hrSeason','HR'],['hr5','HR L5'],['avg5','AVG L5']];
     const arrow=c=> rosterSortKey===c ? (rosterSortDir<0?' ▼':' ▲') : '';
-    head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['rating','cal','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
+    head=cols.map(([c,lbl])=>`<th onclick="rosterSort('${c}')" class="${['cal','fo','barrel','ev','xwoba','hrSeason','hr5','avg5'].includes(c)?'num':''}">${lbl}${arrow(c)}</th>`).join('');
     body=rows.map(p=>`<tr>${cells(p)}</tr>`).join('');
   }else{
     const key=rosterView==='team'?'team':'game';
@@ -358,13 +358,13 @@ function renderRoster(){
       return `<tr><td colspan="${COLN}" style="${grpStyle}">${label(g)} · ${list.length}</td></tr>`
         + list.map(p=>`<tr>${cells(p)}</tr>`).join('');
     }).join('');
-    const cols=['Rating','HR%','Player','Tm','Matchup','Bar%','EV','xwOBA','HR','HR L5','AVG L5'];
-    const numset=new Set(['Rating','HR%','Bar%','EV','xwOBA','HR','HR L5','AVG L5']);
+    const cols=['HR%','Fair Odds','Player','Tm','Matchup','Bar%','EV','xwOBA','HR','HR L5','AVG L5'];
+    const numset=new Set(['HR%','Fair Odds','Bar%','EV','xwOBA','HR','HR L5','AVG L5']);
     head=cols.map(c=>`<th class="${numset.has(c)?'num':''}" style="cursor:default">${c}</th>`).join('');
   }
 
   wrap.innerHTML=toggle
-    +`<div class="slate-count">${rows.length} qualified hitters · HR% = calibrated probability${rosterView==='flat'?' · click a column to sort':' · sorted by rating within each group'}</div>`
+    +`<div class="slate-count">${rows.length} qualified hitters · HR% = calibrated probability · Fair Odds = model (not a market price)${rosterView==='flat'?' · click a column to sort':' · sorted by rating within each group'}</div>`
     +`<div class="slate-scroll"><table class="slate-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
