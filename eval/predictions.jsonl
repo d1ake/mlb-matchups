@@ -10917,3 +10917,27 @@
 {"date":"2026-07-12","id":672386,"name":"Alejandro Kirk","team":"TOR","venue":"SD","game":"TOR@SD","pitcher":"Germán Márquez","hand":"R","pitcherHand":"R","rating":14,"modelProb":0.14,"actualHR":0}
 {"date":"2026-07-12","id":676391,"name":"Ernie Clement","team":"TOR","venue":"SD","game":"TOR@SD","pitcher":"Germán Márquez","hand":"R","pitcherHand":"R","rating":14,"modelProb":0.14,"actualHR":1}
 {"date":"2026-07-12","id":664770,"name":"Nathan Lukes","team":"TOR","venue":"SD","game":"TOR@SD","pitcher":"Germán Márquez","hand":"L","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":1}
+{"date":"2026-07-16","id":656941,"name":"Kyle Schwarber","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":46,"modelProb":0.46,"actualHR":null}
+{"date":"2026-07-16","id":547180,"name":"Bryce Harper","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":36,"modelProb":0.36,"actualHR":null}
+{"date":"2026-07-16","id":656537,"name":"Derek Hill","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"R","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
+{"date":"2026-07-16","id":669016,"name":"Brandon Marsh","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
+{"date":"2026-07-16","id":687282,"name":"Gabriel Rincones Jr.","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":26,"modelProb":0.26,"actualHR":null}
+{"date":"2026-07-16","id":624641,"name":"Edmundo Sosa","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-07-16","id":681082,"name":"Bryson Stott","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":27,"modelProb":0.27,"actualHR":null}
+{"date":"2026-07-16","id":607208,"name":"Trea Turner","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"R","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-07-16","id":664761,"name":"Alec Bohm","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"R","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
+{"date":"2026-07-16","id":592663,"name":"J.T. Realmuto","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"R","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
+{"date":"2026-07-16","id":665561,"name":"Rafael Marchán","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"S","pitcherHand":"R","rating":14,"modelProb":0.14,"actualHR":null}
+{"date":"2026-07-16","id":702222,"name":"Justin Crawford","team":"PHI","venue":"PHI","game":"NYM@PHI","pitcher":"Christian Scott","hand":"L","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
+{"date":"2026-07-16","id":682626,"name":"Francisco Alvarez","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"R","pitcherHand":"R","rating":32,"modelProb":0.32,"actualHR":null}
+{"date":"2026-07-16","id":665742,"name":"Juan Soto","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"L","pitcherHand":"R","rating":44,"modelProb":0.44,"actualHR":null}
+{"date":"2026-07-16","id":676724,"name":"Jared Young","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"L","pitcherHand":"R","rating":33,"modelProb":0.33,"actualHR":null}
+{"date":"2026-07-16","id":621438,"name":"Tyrone Taylor","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-07-16","id":683146,"name":"Brett Baty","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
+{"date":"2026-07-16","id":596019,"name":"Francisco Lindor","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"S","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
+{"date":"2026-07-16","id":701807,"name":"Carson Benge","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"L","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
+{"date":"2026-07-16","id":805999,"name":"A.J. Ewing","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"L","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
+{"date":"2026-07-16","id":666182,"name":"Bo Bichette","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"R","pitcherHand":"R","rating":26,"modelProb":0.26,"actualHR":null}
+{"date":"2026-07-16","id":670097,"name":"Zack Short","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-07-16","id":620443,"name":"Luis Torrens","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"R","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
+{"date":"2026-07-16","id":593871,"name":"Jorge Polanco","team":"NYM","venue":"PHI","game":"NYM@PHI","pitcher":"Aaron Nola","hand":"S","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
