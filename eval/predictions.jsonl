@@ -35563,28 +35563,80 @@
 {"date":"2026-10-13","id":608070,"name":"José Ramírez","team":"CLE","venue":"TB","game":"CLE@TB","pitcher":"Freddy Peralta","hand":"S","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":0}
 {"date":"2026-10-13","id":677587,"name":"Brayan Rocchio","team":"CLE","venue":"TB","game":"CLE@TB","pitcher":"Freddy Peralta","hand":"S","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":0}
 {"date":"2026-10-13","id":680757,"name":"Steven Kwan","team":"CLE","venue":"TB","game":"CLE@TB","pitcher":"Freddy Peralta","hand":"L","pitcherHand":"R","rating":15,"modelProb":0.15,"actualHR":0}
-{"date":"2026-10-14","id":660271,"name":"Shohei Ohtani","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":37,"modelProb":0.37,"actualHR":null}
-{"date":"2026-10-14","id":571970,"name":"Max Muncy","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":null}
-{"date":"2026-10-14","id":669257,"name":"Will Smith","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":33,"modelProb":0.33,"actualHR":null}
-{"date":"2026-10-14","id":606192,"name":"Teoscar Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":31,"modelProb":0.31,"actualHR":null}
-{"date":"2026-10-14","id":518692,"name":"Freddie Freeman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":25,"modelProb":0.25,"actualHR":null}
-{"date":"2026-10-14","id":571771,"name":"Enrique Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":27,"modelProb":0.27,"actualHR":null}
-{"date":"2026-10-14","id":681624,"name":"Andy Pages","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":29,"modelProb":0.29,"actualHR":null}
-{"date":"2026-10-14","id":605141,"name":"Mookie Betts","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-14","id":660271,"name":"Shohei Ohtani","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":37,"modelProb":0.37,"actualHR":0}
+{"date":"2026-10-14","id":571970,"name":"Max Muncy","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":0}
+{"date":"2026-10-14","id":669257,"name":"Will Smith","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":33,"modelProb":0.33,"actualHR":0}
+{"date":"2026-10-14","id":606192,"name":"Teoscar Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":31,"modelProb":0.31,"actualHR":0}
+{"date":"2026-10-14","id":518692,"name":"Freddie Freeman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":25,"modelProb":0.25,"actualHR":0}
+{"date":"2026-10-14","id":571771,"name":"Enrique Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":27,"modelProb":0.27,"actualHR":0}
+{"date":"2026-10-14","id":681624,"name":"Andy Pages","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":29,"modelProb":0.29,"actualHR":0}
+{"date":"2026-10-14","id":605141,"name":"Mookie Betts","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":0}
 {"date":"2026-10-14","id":676439,"name":"Hunter Feduccia","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":21,"modelProb":0.21,"actualHR":null}
-{"date":"2026-10-14","id":663656,"name":"Kyle Tucker","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":null}
-{"date":"2026-10-14","id":669242,"name":"Tommy Edman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"S","pitcherHand":"L","rating":21,"modelProb":0.21,"actualHR":null}
-{"date":"2026-10-14","id":500743,"name":"Miguel Rojas","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":null}
-{"date":"2026-10-14","id":641343,"name":"Jake Bauers","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":34,"modelProb":0.34,"actualHR":null}
-{"date":"2026-10-14","id":694192,"name":"Jackson Chourio","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":35,"modelProb":0.35,"actualHR":null}
-{"date":"2026-10-14","id":669003,"name":"Garrett Mitchell","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":null}
-{"date":"2026-10-14","id":592885,"name":"Christian Yelich","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":24,"modelProb":0.24,"actualHR":null}
-{"date":"2026-10-14","id":661388,"name":"William Contreras","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-14","id":663656,"name":"Kyle Tucker","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"L","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":0}
+{"date":"2026-10-14","id":669242,"name":"Tommy Edman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"S","pitcherHand":"L","rating":21,"modelProb":0.21,"actualHR":0}
+{"date":"2026-10-14","id":500743,"name":"Miguel Rojas","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"Robert Gasser","hand":"R","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":0}
+{"date":"2026-10-14","id":641343,"name":"Jake Bauers","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":34,"modelProb":0.34,"actualHR":1}
+{"date":"2026-10-14","id":694192,"name":"Jackson Chourio","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":35,"modelProb":0.35,"actualHR":1}
+{"date":"2026-10-14","id":669003,"name":"Garrett Mitchell","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":1}
+{"date":"2026-10-14","id":592885,"name":"Christian Yelich","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":24,"modelProb":0.24,"actualHR":0}
+{"date":"2026-10-14","id":661388,"name":"William Contreras","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":0}
 {"date":"2026-10-14","id":596142,"name":"Gary Sánchez","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":30,"modelProb":0.3,"actualHR":null}
-{"date":"2026-10-14","id":668930,"name":"Brice Turang","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":26,"modelProb":0.26,"actualHR":null}
-{"date":"2026-10-14","id":683734,"name":"Andrew Vaughn","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":26,"modelProb":0.26,"actualHR":null}
-{"date":"2026-10-14","id":687401,"name":"Joey Ortiz","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":24,"modelProb":0.24,"actualHR":null}
-{"date":"2026-10-14","id":800325,"name":"Luis Lara","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"S","pitcherHand":"L","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-10-14","id":668930,"name":"Brice Turang","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":26,"modelProb":0.26,"actualHR":0}
+{"date":"2026-10-14","id":683734,"name":"Andrew Vaughn","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":26,"modelProb":0.26,"actualHR":0}
+{"date":"2026-10-14","id":687401,"name":"Joey Ortiz","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":24,"modelProb":0.24,"actualHR":0}
+{"date":"2026-10-14","id":800325,"name":"Luis Lara","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"S","pitcherHand":"L","rating":19,"modelProb":0.19,"actualHR":0}
 {"date":"2026-10-14","id":666152,"name":"David Hamilton","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":16,"modelProb":0.16,"actualHR":null}
-{"date":"2026-10-14","id":806198,"name":"Cooper Pratt","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":null}
+{"date":"2026-10-14","id":806198,"name":"Cooper Pratt","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"R","pitcherHand":"L","rating":22,"modelProb":0.22,"actualHR":0}
 {"date":"2026-10-14","id":686217,"name":"Sal Frelick","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Blake Snell","hand":"L","pitcherHand":"L","rating":15,"modelProb":0.15,"actualHR":null}
+{"date":"2026-10-15","id":666176,"name":"Jo Adell","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"R","pitcherHand":"R","rating":25,"modelProb":0.25,"actualHR":null}
+{"date":"2026-10-15","id":663993,"name":"Nathaniel Lowe","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
+{"date":"2026-10-15","id":672275,"name":"Patrick Bailey","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"S","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-10-15","id":682657,"name":"Angel Martínez","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"S","pitcherHand":"R","rating":23,"modelProb":0.23,"actualHR":null}
+{"date":"2026-10-15","id":681807,"name":"David Fry","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"R","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
+{"date":"2026-10-15","id":800050,"name":"Chase DeLauter","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"L","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
+{"date":"2026-10-15","id":690984,"name":"Petey Halpin","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"L","pitcherHand":"R","rating":20,"modelProb":0.2,"actualHR":null}
+{"date":"2026-10-15","id":683953,"name":"Travis Bazzana","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"L","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
+{"date":"2026-10-15","id":694197,"name":"Angel Genao","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"S","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-10-15","id":595978,"name":"Austin Hedges","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"R","pitcherHand":"R","rating":15,"modelProb":0.15,"actualHR":null}
+{"date":"2026-10-15","id":608070,"name":"José Ramírez","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"S","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-10-15","id":677587,"name":"Brayan Rocchio","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"S","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
+{"date":"2026-10-15","id":680757,"name":"Steven Kwan","team":"CLE","venue":"CLE","game":"TB@CLE","pitcher":"Griffin Jax","hand":"L","pitcherHand":"R","rating":15,"modelProb":0.15,"actualHR":null}
+{"date":"2026-10-15","id":691406,"name":"Junior Caminero","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":33,"modelProb":0.33,"actualHR":null}
+{"date":"2026-10-15","id":683748,"name":"Victor Mesa Jr.","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":31,"modelProb":0.31,"actualHR":null}
+{"date":"2026-10-15","id":666018,"name":"Jonathan Aranda","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-15","id":622761,"name":"Jorge Mateo","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-10-15","id":650490,"name":"Yandy Díaz","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-10-15","id":668723,"name":"Ryan Vilade","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":23,"modelProb":0.23,"actualHR":null}
+{"date":"2026-10-15","id":656775,"name":"Cedric Mullins","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-10-15","id":680700,"name":"Richie Palacios","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-10-15","id":689414,"name":"Liam Hicks","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":20,"modelProb":0.2,"actualHR":null}
+{"date":"2026-10-15","id":676356,"name":"Jonny DeLuca","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":15,"modelProb":0.15,"actualHR":null}
+{"date":"2026-10-15","id":663743,"name":"Nick Fortes","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":13,"modelProb":0.13,"actualHR":null}
+{"date":"2026-10-15","id":670764,"name":"Taylor Walls","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"S","pitcherHand":"R","rating":13,"modelProb":0.13,"actualHR":null}
+{"date":"2026-10-15","id":810938,"name":"Ben Williamson","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"R","pitcherHand":"R","rating":14,"modelProb":0.14,"actualHR":null}
+{"date":"2026-10-15","id":802415,"name":"Chandler Simpson","team":"TB","venue":"CLE","game":"TB@CLE","pitcher":"Gavin Williams","hand":"L","pitcherHand":"R","rating":12,"modelProb":0.12,"actualHR":null}
+{"date":"2026-10-15","id":660271,"name":"Shohei Ohtani","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"L","pitcherHand":"R","rating":42,"modelProb":0.42,"actualHR":null}
+{"date":"2026-10-15","id":571970,"name":"Max Muncy","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"L","pitcherHand":"R","rating":36,"modelProb":0.36,"actualHR":null}
+{"date":"2026-10-15","id":669257,"name":"Will Smith","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-15","id":606192,"name":"Teoscar Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":28,"modelProb":0.28,"actualHR":null}
+{"date":"2026-10-15","id":518692,"name":"Freddie Freeman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"L","pitcherHand":"R","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-15","id":571771,"name":"Enrique Hernández","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-10-15","id":681624,"name":"Andy Pages","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":26,"modelProb":0.26,"actualHR":null}
+{"date":"2026-10-15","id":605141,"name":"Mookie Betts","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":27,"modelProb":0.27,"actualHR":null}
+{"date":"2026-10-15","id":676439,"name":"Hunter Feduccia","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"L","pitcherHand":"R","rating":26,"modelProb":0.26,"actualHR":null}
+{"date":"2026-10-15","id":663656,"name":"Kyle Tucker","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"L","pitcherHand":"R","rating":27,"modelProb":0.27,"actualHR":null}
+{"date":"2026-10-15","id":669242,"name":"Tommy Edman","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"S","pitcherHand":"R","rating":22,"modelProb":0.22,"actualHR":null}
+{"date":"2026-10-15","id":500743,"name":"Miguel Rojas","team":"LAD","venue":"LAD","game":"MIL@LAD","pitcher":"TBD","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-10-15","id":641343,"name":"Jake Bauers","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":37,"modelProb":0.37,"actualHR":null}
+{"date":"2026-10-15","id":694192,"name":"Jackson Chourio","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":30,"modelProb":0.3,"actualHR":null}
+{"date":"2026-10-15","id":669003,"name":"Garrett Mitchell","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":33,"modelProb":0.33,"actualHR":null}
+{"date":"2026-10-15","id":592885,"name":"Christian Yelich","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":27,"modelProb":0.27,"actualHR":null}
+{"date":"2026-10-15","id":661388,"name":"William Contreras","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":25,"modelProb":0.25,"actualHR":null}
+{"date":"2026-10-15","id":596142,"name":"Gary Sánchez","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":24,"modelProb":0.24,"actualHR":null}
+{"date":"2026-10-15","id":668930,"name":"Brice Turang","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":29,"modelProb":0.29,"actualHR":null}
+{"date":"2026-10-15","id":683734,"name":"Andrew Vaughn","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":21,"modelProb":0.21,"actualHR":null}
+{"date":"2026-10-15","id":687401,"name":"Joey Ortiz","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-10-15","id":800325,"name":"Luis Lara","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"S","pitcherHand":"R","rating":18,"modelProb":0.18,"actualHR":null}
+{"date":"2026-10-15","id":666152,"name":"David Hamilton","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":19,"modelProb":0.19,"actualHR":null}
+{"date":"2026-10-15","id":806198,"name":"Cooper Pratt","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"R","pitcherHand":"R","rating":16,"modelProb":0.16,"actualHR":null}
+{"date":"2026-10-15","id":686217,"name":"Sal Frelick","team":"MIL","venue":"LAD","game":"MIL@LAD","pitcher":"Tyler Glasnow","hand":"L","pitcherHand":"R","rating":17,"modelProb":0.17,"actualHR":null}
